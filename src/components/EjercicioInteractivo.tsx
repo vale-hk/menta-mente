@@ -411,6 +411,132 @@ function MemoriaLista({ ej }: { ej: Extract<Ejercicio, { tipo: "memoria-lista" }
   );
 }
 
+function Clasificar({ ej }: { ej: Extract<Ejercicio, { tipo: "clasificar" }> }) {
+  const [asig, setAsig] = useState<Record<string, string>>({});
+  const [rev, setRev] = useState(false);
+  const aciertos = ej.items.filter((it) => asig[it.texto] === it.grupo).length;
+  const correcto = aciertos === ej.items.length;
+  return (
+    <div>
+      <div className="mt-4 grid gap-3">
+        {ej.items.map((it) => (
+          <div
+            key={it.texto}
+            className="flex flex-wrap items-center gap-3 rounded-lg border-2 border-border p-3"
+          >
+            <span className="flex-1 text-lg font-semibold">{it.texto}</span>
+            {ej.grupos.map((g) => (
+              <button
+                key={g}
+                type="button"
+                aria-pressed={asig[it.texto] === g}
+                aria-label={`${it.texto}: ${g}`}
+                onClick={() => {
+                  setAsig((a) => ({ ...a, [it.texto]: g }));
+                  setRev(false);
+                }}
+                className={`${botonBase} ${
+                  asig[it.texto] === g ? "bg-secondary text-secondary-foreground" : ""
+                }`}
+              >
+                {g}
+              </button>
+            ))}
+            {rev && (
+              <span className="w-full text-base font-semibold">
+                {asig[it.texto] === it.grupo ? "Correcto" : `Corresponde a: ${it.grupo}`}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 flex flex-wrap gap-3">
+        <button type="button" className={botonAccion} onClick={() => setRev(true)}>
+          Comprobar
+        </button>
+        <button
+          type="button"
+          className={botonBase}
+          onClick={() => {
+            setAsig({});
+            setRev(false);
+          }}
+        >
+          Reiniciar
+        </button>
+      </div>
+      <Feedback
+        estado={rev ? (correcto ? "ok" : "mal") : null}
+        texto={rev ? `Clasificó correctamente ${aciertos} de ${ej.items.length}.` : undefined}
+      />
+    </div>
+  );
+}
+
+function VerdaderoFalso({ ej }: { ej: Extract<Ejercicio, { tipo: "verdadero-falso" }> }) {
+  const [resp, setResp] = useState<Record<number, boolean>>({});
+  const [rev, setRev] = useState(false);
+  const aciertos = ej.afirmaciones.filter((a, i) => resp[i] === a.correcta).length;
+  const correcto = aciertos === ej.afirmaciones.length;
+  return (
+    <div>
+      <div className="mt-4 grid gap-3">
+        {ej.afirmaciones.map((a, i) => (
+          <div
+            key={a.texto}
+            className="flex flex-wrap items-center gap-3 rounded-lg border-2 border-border p-3"
+          >
+            <span className="flex-1 text-lg font-semibold">{a.texto}</span>
+            {[true, false].map((v) => (
+              <button
+                key={String(v)}
+                type="button"
+                aria-pressed={resp[i] === v}
+                aria-label={`${a.texto}: ${v ? "Verdadero" : "Falso"}`}
+                onClick={() => {
+                  setResp((r) => ({ ...r, [i]: v }));
+                  setRev(false);
+                }}
+                className={`${botonBase} ${
+                  resp[i] === v ? "bg-secondary text-secondary-foreground" : ""
+                }`}
+              >
+                {v ? "Verdadero" : "Falso"}
+              </button>
+            ))}
+            {rev && (
+              <span className="w-full text-base font-semibold">
+                {resp[i] === a.correcta
+                  ? "Correcto"
+                  : `La respuesta correcta es: ${a.correcta ? "Verdadero" : "Falso"}`}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 flex flex-wrap gap-3">
+        <button type="button" className={botonAccion} onClick={() => setRev(true)}>
+          Comprobar
+        </button>
+        <button
+          type="button"
+          className={botonBase}
+          onClick={() => {
+            setResp({});
+            setRev(false);
+          }}
+        >
+          Reiniciar
+        </button>
+      </div>
+      <Feedback
+        estado={rev ? (correcto ? "ok" : "mal") : null}
+        texto={rev ? `Acertó ${aciertos} de ${ej.afirmaciones.length}.` : undefined}
+      />
+    </div>
+  );
+}
+
 export function EjercicioInteractivo({ ejercicio }: { ejercicio: Ejercicio }) {
   return (
     <article className="surface-card p-6">
@@ -422,6 +548,8 @@ export function EjercicioInteractivo({ ejercicio }: { ejercicio: Ejercicio }) {
       {ejercicio.tipo === "emparejar" && <Emparejar ej={ejercicio} />}
       {ejercicio.tipo === "texto" && <Texto ej={ejercicio} />}
       {ejercicio.tipo === "memoria-lista" && <MemoriaLista ej={ejercicio} />}
+      {ejercicio.tipo === "clasificar" && <Clasificar ej={ejercicio} />}
+      {ejercicio.tipo === "verdadero-falso" && <VerdaderoFalso ej={ejercicio} />}
     </article>
   );
 }
