@@ -50,6 +50,23 @@ export type Ejercicio =
       tipo: "memoria-lista";
       lista: string[];
       segundos: number;
+    }
+  | {
+      id: string;
+      categoria: Categoria;
+      titulo: string;
+      instrucciones: string;
+      tipo: "clasificar";
+      grupos: string[];
+      items: { texto: string; grupo: string }[];
+    }
+  | {
+      id: string;
+      categoria: Categoria;
+      titulo: string;
+      instrucciones: string;
+      tipo: "verdadero-falso";
+      afirmaciones: { texto: string; correcta: boolean }[];
     };
 
 export type Categoria = "atencion" | "memoria" | "funciones-ejecutivas" | "lenguaje";
