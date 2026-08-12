@@ -49,6 +49,7 @@ export type Ejercicio =
       instrucciones: string;
       tipo: "memoria-lista";
       lista: string[];
+      distractores?: string[];
       segundos: number;
     }
   | {
