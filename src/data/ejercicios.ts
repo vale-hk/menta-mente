@@ -49,7 +49,25 @@ export type Ejercicio =
       instrucciones: string;
       tipo: "memoria-lista";
       lista: string[];
+      distractores?: string[];
       segundos: number;
+    }
+  | {
+      id: string;
+      categoria: Categoria;
+      titulo: string;
+      instrucciones: string;
+      tipo: "clasificar";
+      grupos: string[];
+      items: { texto: string; grupo: string }[];
+    }
+  | {
+      id: string;
+      categoria: Categoria;
+      titulo: string;
+      instrucciones: string;
+      tipo: "verdadero-falso";
+      afirmaciones: { texto: string; correcta: boolean }[];
     };
 
 export type Categoria = "atencion" | "memoria" | "funciones-ejecutivas" | "lenguaje";
@@ -246,5 +264,170 @@ export const ejercicios: Ejercicio[] = [
       "«María fue a la feria antes de pasar por la farmacia». ¿Dónde estuvo primero María?",
     opciones: ["En la farmacia", "En la feria", "En su casa", "En el almacén"],
     correcta: 1,
+  },
+
+  // ===== NUEVAS ACTIVIDADES =====
+
+  // ATENCIÓN
+  {
+    id: "at-5",
+    categoria: "atencion",
+    titulo: "Cancelación de números pares",
+    instrucciones: "Marque todos los números pares de la cuadrícula. Deje sin marcar los impares.",
+    tipo: "seleccion-multiple",
+    items: ["7", "12", "3", "20", "15", "8", "9", "4", "11", "18", "5", "6"],
+    correctas: [1, 3, 5, 7, 9, 11],
+  },
+  {
+    id: "at-6",
+    categoria: "atencion",
+    titulo: "Atención dividida: dos criterios",
+    instrucciones:
+      "Clasifique cada elemento según sea algo que se come o algo que se usa para limpiar.",
+    tipo: "clasificar",
+    grupos: ["Se come", "Sirve para limpiar"],
+    items: [
+      { texto: "Pan", grupo: "Se come" },
+      { texto: "Escoba", grupo: "Sirve para limpiar" },
+      { texto: "Queso", grupo: "Se come" },
+      { texto: "Detergente", grupo: "Sirve para limpiar" },
+      { texto: "Manzana", grupo: "Se come" },
+      { texto: "Trapero", grupo: "Sirve para limpiar" },
+    ],
+  },
+  {
+    id: "at-7",
+    categoria: "atencion",
+    titulo: "Series alternadas",
+    instrucciones: "Observe el patrón que alterna y elija el elemento que continúa.",
+    tipo: "opcion-multiple",
+    enunciado: "A · 1 · B · 2 · C · 3 · D · ?",
+    opciones: ["E", "4", "5", "D"],
+    correcta: 1,
+  },
+
+  // MEMORIA
+  {
+    id: "me-4",
+    categoria: "memoria",
+    titulo: "Recado telefónico",
+    instrucciones:
+      "Memorice el recado durante 25 segundos y luego marque solo los datos que aparecían.",
+    tipo: "memoria-lista",
+    lista: ["Doctora Rojas", "Martes", "10:30", "Consultorio 4", "Llevar carné"],
+    distractores: ["Doctor Pérez", "Jueves", "11:30", "Consultorio 7"],
+    segundos: 25,
+  },
+  {
+    id: "me-5",
+    categoria: "memoria",
+    titulo: "Memoria de trabajo: orden inverso",
+    instrucciones: "Lea la serie y responda por escrito según se indica.",
+    tipo: "texto",
+    preguntas: [
+      { pregunta: "Serie 4 - 7 - 9. Escríbala al revés (sin espacios ni guiones)", respuestas: ["974"] },
+      { pregunta: "Serie 2 - 5 - 8 - 1. Escríbala al revés", respuestas: ["1852"] },
+      { pregunta: "Palabra CASA escrita al revés", respuestas: ["asac"] },
+    ],
+  },
+  {
+    id: "me-6",
+    categoria: "memoria",
+    titulo: "Memoria semántica: ¿verdadero o falso?",
+    instrucciones: "Indique si cada afirmación es verdadera o falsa.",
+    tipo: "verdadero-falso",
+    afirmaciones: [
+      { texto: "El invierno en Chile comienza en junio.", correcta: true },
+      { texto: "Un año tiene trece meses.", correcta: false },
+      { texto: "El agua hierve y se convierte en vapor.", correcta: true },
+      { texto: "La luna sale durante el día y nunca de noche.", correcta: false },
+    ],
+  },
+
+  // FUNCIONES EJECUTIVAS
+  {
+    id: "fe-5",
+    categoria: "funciones-ejecutivas",
+    titulo: "Organizar el trámite en el banco",
+    instrucciones: "Ordene los pasos del trámite desde el primero hasta el último.",
+    tipo: "orden",
+    pasos: [
+      "Reunir los documentos necesarios",
+      "Sacar número de atención",
+      "Esperar el turno",
+      "Explicar el trámite al ejecutivo",
+      "Firmar los papeles",
+      "Guardar el comprobante",
+    ],
+  },
+  {
+    id: "fe-6",
+    categoria: "funciones-ejecutivas",
+    titulo: "Presupuesto de la semana",
+    instrucciones: "Resuelva el cálculo y elija la alternativa correcta.",
+    tipo: "opcion-multiple",
+    enunciado:
+      "Dispone de $20.000. Gasta $6.500 en verduras y $4.800 en carne. ¿Cuánto le queda?",
+    opciones: ["$8.700", "$9.700", "$11.300", "$8.300"],
+    correcta: 0,
+  },
+  {
+    id: "fe-7",
+    categoria: "funciones-ejecutivas",
+    titulo: "Clasificar por urgencia",
+    instrucciones: "Decida qué situaciones requieren atención inmediata y cuáles pueden esperar.",
+    tipo: "clasificar",
+    grupos: ["Atender ahora", "Puede esperar"],
+    items: [
+      { texto: "Se corta la luz de noche", grupo: "Atender ahora" },
+      { texto: "Regar las plantas", grupo: "Puede esperar" },
+      { texto: "Se quema una olla en la cocina", grupo: "Atender ahora" },
+      { texto: "Ordenar el clóset", grupo: "Puede esperar" },
+      { texto: "Olvidó tomar el remedio de la mañana", grupo: "Atender ahora" },
+      { texto: "Devolver un libro prestado", grupo: "Puede esperar" },
+    ],
+  },
+
+  // LENGUAJE
+  {
+    id: "le-5",
+    categoria: "lenguaje",
+    titulo: "Antónimos",
+    instrucciones: "Una cada palabra con su significado contrario.",
+    tipo: "emparejar",
+    pares: [
+      { izquierda: "Frío", derecha: "Caliente" },
+      { izquierda: "Lleno", derecha: "Vacío" },
+      { izquierda: "Antiguo", derecha: "Nuevo" },
+      { izquierda: "Difícil", derecha: "Fácil" },
+    ],
+  },
+  {
+    id: "le-6",
+    categoria: "lenguaje",
+    titulo: "Definiciones: ¿de qué hablamos?",
+    instrucciones: "Lea la definición y escriba la palabra correspondiente.",
+    tipo: "texto",
+    preguntas: [
+      { pregunta: "Objeto que sirve para saber la hora", respuestas: ["reloj", "el reloj"] },
+      { pregunta: "Lugar donde se compran los remedios", respuestas: ["farmacia", "la farmacia"] },
+      { pregunta: "Persona que apaga los incendios", respuestas: ["bombero", "el bombero", "bomberos"] },
+    ],
+  },
+  {
+    id: "le-7",
+    categoria: "lenguaje",
+    titulo: "Categorías semánticas",
+    instrucciones: "Clasifique cada palabra en la categoría a la que pertenece.",
+    tipo: "clasificar",
+    grupos: ["Animales", "Medios de transporte"],
+    items: [
+      { texto: "Caballo", grupo: "Animales" },
+      { texto: "Micro", grupo: "Medios de transporte" },
+      { texto: "Gato", grupo: "Animales" },
+      { texto: "Tren", grupo: "Medios de transporte" },
+      { texto: "Gallina", grupo: "Animales" },
+      { texto: "Bicicleta", grupo: "Medios de transporte" },
+    ],
   },
 ];
