@@ -304,7 +304,7 @@ function Texto({ ej }: { ej: Extract<Ejercicio, { tipo: "texto" }> }) {
 }
 
 function MemoriaLista({ ej }: { ej: Extract<Ejercicio, { tipo: "memoria-lista" }> }) {
-  const distractores = ["Café", "Azúcar", "Pollo", "Servilletas"];
+  const distractores = ej.distractores ?? ["Café", "Azúcar", "Pollo", "Servilletas"];
   const opciones = useMemo(
     () => [...ej.lista, ...distractores].slice().sort((a, b) => a.localeCompare(b)),
     [ej],
