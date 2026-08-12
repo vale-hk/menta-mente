@@ -9,7 +9,7 @@ function normalizar(t: string) {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
-function Feedback({ estado, texto }: { estado: "ok" | "mal" | null; texto?: string }) {
+function Feedback({ estado, texto }: { estado: "ok" | "mal" | null; texto?: string | undefined }) {
   if (!estado) return null;
   return (
     <p
@@ -127,7 +127,10 @@ function Orden({ ej }: { ej: Extract<Ejercicio, { tipo: "orden" }> }) {
     const copia = ej.pasos.map((p, i) => ({ p, i }));
     for (let k = copia.length - 1; k > 0; k--) {
       const j = (k * 7 + 3) % (k + 1);
-      [copia[k], copia[j]] = [copia[j], copia[k]];
+      const a = copia[k]!;
+      const b = copia[j]!;
+      copia[k] = b;
+      copia[j] = a;
     }
     return copia;
   }, [ej]);
@@ -138,7 +141,10 @@ function Orden({ ej }: { ej: Extract<Ejercicio, { tipo: "orden" }> }) {
   const mover = (from: number, to: number) => {
     if (to < 0 || to >= orden.length) return;
     const copia = [...orden];
-    [copia[from], copia[to]] = [copia[to], copia[from]];
+    const a = copia[from]!;
+    const b = copia[to]!;
+    copia[from] = b;
+    copia[to] = a;
     setOrden(copia);
     setRev(false);
   };
