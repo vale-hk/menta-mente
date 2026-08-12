@@ -429,4 +429,3 @@ export const ejercicios: Ejercicio[] = [
     ],
   },
 ];
-];
