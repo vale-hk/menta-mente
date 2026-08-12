@@ -315,6 +315,7 @@ export const ejercicios: Ejercicio[] = [
       "Memorice el recado durante 25 segundos y luego marque solo los datos que aparecían.",
     tipo: "memoria-lista",
     lista: ["Doctora Rojas", "Martes", "10:30", "Consultorio 4", "Llevar carné"],
+    distractores: ["Doctor Pérez", "Jueves", "11:30", "Consultorio 7"],
     segundos: 25,
   },
   {
