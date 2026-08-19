@@ -3,7 +3,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
 const registroSchema = z.object({
-  categoria: z.enum(["atencion", "memoria", "ejecutivas", "lenguaje"]),
+  categoria: z.enum(["atencion", "memoria", "funciones-ejecutivas", "lenguaje"]),
   nombre_ejercicio: z.string().trim().min(1).max(160),
   ejercicio_id: z.string().trim().min(1).max(80),
   puntaje: z.number().int().min(0).max(100),
