@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Ejercicio } from "@/data/ejercicios";
+import { useRegistroEjercicio } from "@/components/RegistroProgreso";
 
 function normalizar(t: string) {
   return t
@@ -29,6 +30,7 @@ const botonAccion =
   "min-h-12 rounded-lg bg-primary px-5 py-2 text-base font-semibold text-primary-foreground transition-opacity hover:opacity-90";
 
 function OpcionMultiple({ ej }: { ej: Extract<Ejercicio, { tipo: "opcion-multiple" }> }) {
+  const registrar = useRegistroEjercicio(ej);
   const [sel, setSel] = useState<number | null>(null);
   const [rev, setRev] = useState(false);
   return (
@@ -51,7 +53,10 @@ function OpcionMultiple({ ej }: { ej: Extract<Ejercicio, { tipo: "opcion-multipl
         ))}
       </div>
       <div className="mt-4 flex flex-wrap gap-3">
-        <button type="button" className={botonAccion} disabled={sel === null} onClick={() => setRev(true)}>
+        <button type="button" className={botonAccion} disabled={sel === null} onClick={() => {
+            setRev(true);
+            registrar(sel === ej.correcta ? 10 : 0);
+          }}>
           Comprobar
         </button>
         <button
@@ -71,6 +76,7 @@ function OpcionMultiple({ ej }: { ej: Extract<Ejercicio, { tipo: "opcion-multipl
 }
 
 function SeleccionMultiple({ ej }: { ej: Extract<Ejercicio, { tipo: "seleccion-multiple" }> }) {
+  const registrar = useRegistroEjercicio(ej);
   const [sel, setSel] = useState<number[]>([]);
   const [rev, setRev] = useState(false);
   const correcto =
@@ -96,7 +102,10 @@ function SeleccionMultiple({ ej }: { ej: Extract<Ejercicio, { tipo: "seleccion-m
         ))}
       </div>
       <div className="mt-4 flex flex-wrap gap-3">
-        <button type="button" className={botonAccion} onClick={() => setRev(true)}>
+        <button type="button" className={botonAccion} onClick={() => {
+            setRev(true);
+            registrar((sel.filter((s) => ej.correctas.includes(s)).length / ej.correctas.length) * 10);
+          }}>
           Comprobar
         </button>
         <button
@@ -123,6 +132,7 @@ function SeleccionMultiple({ ej }: { ej: Extract<Ejercicio, { tipo: "seleccion-m
 }
 
 function Orden({ ej }: { ej: Extract<Ejercicio, { tipo: "orden" }> }) {
+  const registrar = useRegistroEjercicio(ej);
   const barajado = useMemo(() => {
     const copia = ej.pasos.map((p, i) => ({ p, i }));
     for (let k = copia.length - 1; k > 0; k--) {
@@ -176,7 +186,10 @@ function Orden({ ej }: { ej: Extract<Ejercicio, { tipo: "orden" }> }) {
         ))}
       </ol>
       <div className="mt-4 flex flex-wrap gap-3">
-        <button type="button" className={botonAccion} onClick={() => setRev(true)}>
+        <button type="button" className={botonAccion} onClick={() => {
+            setRev(true);
+            registrar((orden.filter((o, idx) => o.i === idx).length / orden.length) * 10);
+          }}>
           Comprobar
         </button>
         <button
@@ -196,6 +209,7 @@ function Orden({ ej }: { ej: Extract<Ejercicio, { tipo: "orden" }> }) {
 }
 
 function Emparejar({ ej }: { ej: Extract<Ejercicio, { tipo: "emparejar" }> }) {
+  const registrar = useRegistroEjercicio(ej);
   const derechas = useMemo(
     () => ej.pares.map((p) => p.derecha).slice().sort((a, b) => a.localeCompare(b)),
     [ej],
@@ -228,7 +242,10 @@ function Emparejar({ ej }: { ej: Extract<Ejercicio, { tipo: "emparejar" }> }) {
         ))}
       </div>
       <div className="mt-4 flex flex-wrap gap-3">
-        <button type="button" className={botonAccion} onClick={() => setRev(true)}>
+        <button type="button" className={botonAccion} onClick={() => {
+            setRev(true);
+            registrar((ej.pares.filter((p) => asig[p.izquierda] === p.derecha).length / ej.pares.length) * 10);
+          }}>
           Comprobar
         </button>
         <button
@@ -248,6 +265,7 @@ function Emparejar({ ej }: { ej: Extract<Ejercicio, { tipo: "emparejar" }> }) {
 }
 
 function Texto({ ej }: { ej: Extract<Ejercicio, { tipo: "texto" }> }) {
+  const registrar = useRegistroEjercicio(ej);
   const [vals, setVals] = useState<string[]>(ej.preguntas.map(() => ""));
   const [rev, setRev] = useState(false);
   const aciertos = ej.preguntas.filter((p, i) =>
@@ -281,7 +299,10 @@ function Texto({ ej }: { ej: Extract<Ejercicio, { tipo: "texto" }> }) {
         ))}
       </div>
       <div className="mt-4 flex flex-wrap gap-3">
-        <button type="button" className={botonAccion} onClick={() => setRev(true)}>
+        <button type="button" className={botonAccion} onClick={() => {
+            setRev(true);
+            registrar((aciertos / ej.preguntas.length) * 10);
+          }}>
           Comprobar
         </button>
         <button
@@ -304,6 +325,7 @@ function Texto({ ej }: { ej: Extract<Ejercicio, { tipo: "texto" }> }) {
 }
 
 function MemoriaLista({ ej }: { ej: Extract<Ejercicio, { tipo: "memoria-lista" }> }) {
+  const registrar = useRegistroEjercicio(ej);
   const distractores = ej.distractores ?? ["Café", "Azúcar", "Pollo", "Servilletas"];
   const opciones = useMemo(
     () => [...ej.lista, ...distractores].slice().sort((a, b) => a.localeCompare(b)),
@@ -384,7 +406,10 @@ function MemoriaLista({ ej }: { ej: Extract<Ejercicio, { tipo: "memoria-lista" }
         ))}
       </div>
       <div className="mt-4 flex flex-wrap gap-3">
-        <button type="button" className={botonAccion} onClick={() => setRev(true)}>
+        <button type="button" className={botonAccion} onClick={() => {
+            setRev(true);
+            registrar((sel.filter((s) => ej.lista.includes(s)).length / ej.lista.length) * 10);
+          }}>
           Comprobar
         </button>
         <button
@@ -412,6 +437,7 @@ function MemoriaLista({ ej }: { ej: Extract<Ejercicio, { tipo: "memoria-lista" }
 }
 
 function Clasificar({ ej }: { ej: Extract<Ejercicio, { tipo: "clasificar" }> }) {
+  const registrar = useRegistroEjercicio(ej);
   const [asig, setAsig] = useState<Record<string, string>>({});
   const [rev, setRev] = useState(false);
   const aciertos = ej.items.filter((it) => asig[it.texto] === it.grupo).length;
@@ -451,7 +477,10 @@ function Clasificar({ ej }: { ej: Extract<Ejercicio, { tipo: "clasificar" }> }) 
         ))}
       </div>
       <div className="mt-4 flex flex-wrap gap-3">
-        <button type="button" className={botonAccion} onClick={() => setRev(true)}>
+        <button type="button" className={botonAccion} onClick={() => {
+            setRev(true);
+            registrar((aciertos / ej.items.length) * 10);
+          }}>
           Comprobar
         </button>
         <button
@@ -474,6 +503,7 @@ function Clasificar({ ej }: { ej: Extract<Ejercicio, { tipo: "clasificar" }> }) 
 }
 
 function VerdaderoFalso({ ej }: { ej: Extract<Ejercicio, { tipo: "verdadero-falso" }> }) {
+  const registrar = useRegistroEjercicio(ej);
   const [resp, setResp] = useState<Record<number, boolean>>({});
   const [rev, setRev] = useState(false);
   const aciertos = ej.afirmaciones.filter((a, i) => resp[i] === a.correcta).length;
@@ -515,7 +545,10 @@ function VerdaderoFalso({ ej }: { ej: Extract<Ejercicio, { tipo: "verdadero-fals
         ))}
       </div>
       <div className="mt-4 flex flex-wrap gap-3">
-        <button type="button" className={botonAccion} onClick={() => setRev(true)}>
+        <button type="button" className={botonAccion} onClick={() => {
+            setRev(true);
+            registrar((aciertos / ej.afirmaciones.length) * 10);
+          }}>
           Comprobar
         </button>
         <button
