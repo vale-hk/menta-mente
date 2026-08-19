@@ -14,7 +14,90 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      activity_logs: {
+        Row: {
+          categoria: string
+          ejercicio_id: string | null
+          fecha_ejecucion: string
+          id: string
+          nombre_ejercicio: string
+          puntaje: number
+          user_id: string
+        }
+        Insert: {
+          categoria: string
+          ejercicio_id?: string | null
+          fecha_ejecucion?: string
+          id?: string
+          nombre_ejercicio: string
+          puntaje?: number
+          user_id: string
+        }
+        Update: {
+          categoria?: string
+          ejercicio_id?: string | null
+          fecha_ejecucion?: string
+          id?: string
+          nombre_ejercicio?: string
+          puntaje?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      otp_codes: {
+        Row: {
+          code_hash: string
+          consumido: boolean
+          created_at: string
+          expires_at: string
+          id: string
+          intentos: number
+          nombre: string
+          telefono: string
+        }
+        Insert: {
+          code_hash: string
+          consumido?: boolean
+          created_at?: string
+          expires_at: string
+          id?: string
+          intentos?: number
+          nombre: string
+          telefono: string
+        }
+        Update: {
+          code_hash?: string
+          consumido?: boolean
+          created_at?: string
+          expires_at?: string
+          id?: string
+          intentos?: number
+          nombre?: string
+          telefono?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          nombre: string
+          telefono: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          nombre: string
+          telefono: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nombre?: string
+          telefono?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
