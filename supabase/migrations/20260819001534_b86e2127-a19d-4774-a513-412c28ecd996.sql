@@ -1,0 +1,2 @@
+ALTER TABLE public.activity_logs DROP CONSTRAINT activity_logs_categoria_check;
+ALTER TABLE public.activity_logs ADD CONSTRAINT activity_logs_categoria_check CHECK (categoria IN ('atencion','memoria','funciones-ejecutivas','lenguaje'));
