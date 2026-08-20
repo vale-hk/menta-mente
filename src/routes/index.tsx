@@ -1,13 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { RegistroProvider } from "@/components/RegistroProgreso";
-import { registrarActividad } from "@/lib/progreso.functions";
 import { useTema } from "@/hooks/useTema";
 import { MintLeaf } from "@/components/MintLeaf";
-import { EjercicioInteractivo } from "@/components/EjercicioInteractivo";
-import { categorias, ejercicios, type Categoria } from "@/data/ejercicios";
+import { categorias } from "@/data/ejercicios";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -33,36 +29,13 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const { oscuro, alternar } = useTema();
-  const [categoria, setCategoria] = useState<Categoria>("atencion");
   const [sesion, setSesion] = useState(false);
-  const [aviso, setAviso] = useState<string | null>(null);
-  const guardar = useServerFn(registrarActividad);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSesion(Boolean(data.session)));
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSesion(Boolean(s)));
     return () => sub.subscription.unsubscribe();
   }, []);
-
-  const registrar = useCallback(
-    (ejercicio: (typeof ejercicios)[number], puntaje: number) => {
-      if (!sesion) return;
-      guardar({
-        data: {
-          categoria: ejercicio.categoria,
-          nombre_ejercicio: ejercicio.titulo,
-          ejercicio_id: ejercicio.id,
-          puntaje,
-        },
-      })
-        .then(() => setAviso(`Guardamos su resultado: ${puntaje} de 10 puntos.`))
-        .catch(() => setAviso("No pudimos guardar su avance. Intente más tarde."));
-    },
-    [guardar, sesion],
-  );
-
-  const actual = categorias.find((c) => c.id === categoria)!;
-  const lista = ejercicios.filter((e) => e.categoria === categoria);
 
   return (
     <div className="min-h-dvh">
@@ -77,10 +50,10 @@ function Index() {
           </div>
           <div className="flex flex-wrap gap-3">
             <Link
-              to={sesion ? "/progreso" : "/auth"}
+              to={sesion ? "/ejercicios" : "/auth"}
               className="min-h-12 rounded-lg border-2 border-border px-5 py-2 text-base font-semibold leading-8 transition-colors hover:bg-accent hover:text-accent-foreground"
             >
-              {sesion ? "Mi progreso" : "Ingresar"}
+              {sesion ? "Ir a mis ejercicios" : "Ingresar"}
             </Link>
             <button
               type="button"
@@ -95,54 +68,49 @@ function Index() {
       </header>
 
       <main className="mx-auto max-w-4xl px-5 py-10">
-        <section aria-labelledby="intro" className="mb-8">
-          <h2 id="intro" className="font-serif text-2xl font-semibold">
-            Elija un área de trabajo
+        <section aria-labelledby="intro">
+          <h2 id="intro" className="font-serif text-3xl font-semibold">
+            Ejercite su mente con actividades guiadas
           </h2>
-          <p className="mt-2 max-w-2xl text-muted-foreground">
-            Cada actividad se resuelve directamente en la pantalla. Puede comprobar sus respuestas
-            y repetir el ejercicio las veces que quiera.
+          <p className="mt-3 max-w-2xl text-lg text-muted-foreground">
+            Menta reúne actividades interactivas de estimulación cognitiva pensadas para el adulto
+            mayor. Los ejercicios se realizan dentro de su espacio privado y cada puntaje queda
+            guardado para seguir su avance.
           </p>
-          <nav aria-label="Áreas cognitivas" className="mt-5 flex flex-wrap gap-3">
-            {categorias.map((c) => (
-              <button
-                key={c.id}
-                type="button"
-                aria-current={categoria === c.id ? "page" : undefined}
-                onClick={() => setCategoria(c.id)}
-                className={`min-h-12 rounded-lg border-2 border-border px-5 py-2 text-base font-semibold transition-colors hover:bg-accent hover:text-accent-foreground ${
-                  categoria === c.id ? "bg-primary text-primary-foreground" : ""
-                }`}
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link
+              to={sesion ? "/ejercicios" : "/auth"}
+              className="min-h-14 rounded-lg bg-primary px-6 py-3 text-lg font-semibold leading-8 text-primary-foreground transition-opacity hover:opacity-90"
+            >
+              {sesion ? "Continuar con mis ejercicios" : "Ingresar para comenzar"}
+            </Link>
+            {sesion && (
+              <Link
+                to="/progreso"
+                className="min-h-14 rounded-lg border-2 border-border px-6 py-3 text-lg font-semibold leading-8"
               >
-                {c.titulo}
-              </button>
-            ))}
-          </nav>
+                Ver mi progreso
+              </Link>
+            )}
+          </div>
+          {!sesion && (
+            <p className="mt-4 text-lg">
+              Para realizar los ejercicios necesita iniciar sesión con su nombre y su teléfono.
+            </p>
+          )}
         </section>
 
-        {!sesion && (
-          <p className="mb-6 rounded-lg border-2 border-border p-4 text-lg">
-            <Link to="/auth" className="font-semibold underline">
-              Ingrese con su nombre y teléfono
-            </Link>{" "}
-            para guardar sus puntajes y ver su progreso.
-          </p>
-        )}
-        {sesion && aviso && (
-          <p role="status" className="mb-6 rounded-lg border-2 border-primary p-4 text-lg font-semibold text-primary">
-            {aviso}
-          </p>
-        )}
-
-        <section aria-live="polite">
-          <h2 className="font-serif text-2xl font-semibold">{actual.titulo}</h2>
-          <p className="mt-1 text-muted-foreground">{actual.resumen}</p>
-          <div className="mt-6 grid gap-6">
-            <RegistroProvider registrar={registrar}>
-              {lista.map((e) => (
-                <EjercicioInteractivo key={e.id} ejercicio={e} />
-              ))}
-            </RegistroProvider>
+        <section aria-labelledby="areas" className="mt-12">
+          <h2 id="areas" className="font-serif text-2xl font-semibold">
+            Las cuatro áreas de trabajo
+          </h2>
+          <div className="mt-6 grid gap-6 sm:grid-cols-2">
+            {categorias.map((c) => (
+              <article key={c.id} className="surface-card p-6">
+                <h3 className="font-serif text-xl font-semibold">{c.titulo}</h3>
+                <p className="mt-2 text-muted-foreground">{c.resumen}</p>
+              </article>
+            ))}
           </div>
         </section>
       </main>
