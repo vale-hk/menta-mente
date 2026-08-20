@@ -72,7 +72,7 @@ function Auth() {
         password: r.password,
       });
       if (errSesion) throw new Error("No se pudo iniciar la sesión.");
-      navigate({ to: "/progreso" });
+      navigate({ to: "/ejercicios" });
     } catch (err) {
       setError(err instanceof Error ? err.message : "El código no es válido.");
     } finally {
@@ -103,7 +103,7 @@ function Auth() {
         <h1 className="font-serif text-3xl font-semibold">Ingrese a su espacio personal</h1>
         <p className="mt-2 text-muted-foreground">
           Solo necesita su nombre y su teléfono. Le enviaremos un PIN de 6 dígitos para confirmar
-          que es usted.
+          que es usted. El PIN es válido durante 1 hora.
         </p>
 
         {paso === "datos" ? (
