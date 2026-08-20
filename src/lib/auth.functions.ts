@@ -62,7 +62,7 @@ export const solicitarPin = createServerFn({ method: "POST" })
       telefono,
       nombre: data.nombre.trim(),
       code_hash,
-      expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+      expires_at: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
     });
     if (error) throw new Error("No se pudo generar el código. Intente nuevamente.");
 

@@ -92,7 +92,7 @@ function Progreso() {
           </Link>
           <div className="flex flex-wrap gap-3">
             <Link
-              to="/"
+              to="/ejercicios"
               className="min-h-12 rounded-lg border-2 border-border px-5 py-2 text-base font-semibold leading-8"
             >
               Ejercicios
