@@ -4,21 +4,21 @@ import { useServerFn } from "@tanstack/react-start";
 import { MintLeaf } from "@/components/MintLeaf";
 import { useTema } from "@/hooks/useTema";
 import { supabase } from "@/integrations/supabase/client";
-import { solicitarPin, verificarPin } from "@/lib/auth.functions";
+import { ingresar } from "@/lib/auth.functions";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Ingresar a Menta — Acceso con teléfono y PIN" },
+      { title: "Ingresar a Menta — Acceso con nombre y PIN" },
       {
         name: "description",
         content:
-          "Ingrese a Menta con su nombre y número de teléfono. Recibirá un PIN de 6 dígitos para acceder a su progreso cognitivo guardado.",
+          "Ingrese a Menta con su nombre, su número de teléfono y el PIN de acceso para realizar los ejercicios y guardar su progreso cognitivo.",
       },
       { property: "og:title", content: "Ingresar a Menta" },
       {
         property: "og:description",
-        content: "Acceso simple con nombre y teléfono para ver su progreso en Menta.",
+        content: "Acceso simple con nombre, teléfono y PIN para usar los ejercicios de Menta.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -35,38 +35,20 @@ const accion =
 function Auth() {
   const { oscuro, alternar } = useTema();
   const navigate = useNavigate();
-  const pedirPin = useServerFn(solicitarPin);
-  const comprobarPin = useServerFn(verificarPin);
+  const entrar = useServerFn(ingresar);
 
-  const [paso, setPaso] = useState<"datos" | "pin">("datos");
   const [nombre, setNombre] = useState("");
   const [telefono, setTelefono] = useState("");
   const [pin, setPin] = useState("");
-  const [demo, setDemo] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [cargando, setCargando] = useState(false);
 
-  async function enviarDatos(e: React.FormEvent) {
+  async function enviar(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setCargando(true);
     try {
-      const r = await pedirPin({ data: { nombre, telefono } });
-      setDemo(r.pinDemo);
-      setPaso("pin");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "No se pudo enviar el código.");
-    } finally {
-      setCargando(false);
-    }
-  }
-
-  async function enviarPin(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-    setCargando(true);
-    try {
-      const r = await comprobarPin({ data: { telefono, pin } });
+      const r = await entrar({ data: { nombre, telefono, pin } });
       const { error: errSesion } = await supabase.auth.signInWithPassword({
         email: r.email,
         password: r.password,
@@ -74,7 +56,7 @@ function Auth() {
       if (errSesion) throw new Error("No se pudo iniciar la sesión.");
       navigate({ to: "/ejercicios" });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "El código no es válido.");
+      setError(err instanceof Error ? err.message : "No se pudo ingresar.");
     } finally {
       setCargando(false);
     }
@@ -102,84 +84,56 @@ function Auth() {
       <main className="mx-auto max-w-md px-5 py-10">
         <h1 className="font-serif text-3xl font-semibold">Ingrese a su espacio personal</h1>
         <p className="mt-2 text-muted-foreground">
-          Solo necesita su nombre y su teléfono. Le enviaremos un PIN de 6 dígitos para confirmar
-          que es usted. El PIN es válido durante 1 hora.
+          Escriba su nombre, su teléfono y el PIN de acceso que le entregó su profesional. La
+          sesión queda abierta y sus ejercicios se guardan automáticamente.
         </p>
 
-        {paso === "datos" ? (
-          <form onSubmit={enviarDatos} className="mt-8 grid gap-5">
-            <label className="grid gap-2">
-              <span className="text-lg font-semibold">Nombre completo</span>
-              <input
-                className={campo}
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-                maxLength={80}
-                autoComplete="name"
-                required
-              />
-            </label>
-            <label className="grid gap-2">
-              <span className="text-lg font-semibold">Número de teléfono</span>
-              <input
-                className={campo}
-                value={telefono}
-                onChange={(e) => setTelefono(e.target.value)}
-                inputMode="tel"
-                maxLength={20}
-                placeholder="+56 9 1234 5678"
-                autoComplete="tel"
-                required
-              />
-            </label>
-            <button type="submit" className={accion} disabled={cargando}>
-              {cargando ? "Enviando…" : "Enviarme el PIN"}
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={enviarPin} className="mt-8 grid gap-5">
-            <p className="rounded-lg border-2 border-border p-4 text-base">
-              Enviamos un PIN al teléfono <strong>{telefono}</strong>.
-              {demo && (
-                <>
-                  {" "}
-                  <span className="block pt-2">
-                    Modo de demostración: su PIN es <strong className="text-2xl">{demo}</strong>
-                  </span>
-                </>
-              )}
-            </p>
-            <label className="grid gap-2">
-              <span className="text-lg font-semibold">PIN de 6 dígitos</span>
-              <input
-                className={`${campo} tracking-[0.5em] text-center text-2xl`}
-                value={pin}
-                onChange={(e) => setPin(e.target.value.replace(/[^0-9]/g, "").slice(0, 6))}
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                required
-              />
-            </label>
-            <button type="submit" className={accion} disabled={cargando || pin.length !== 6}>
-              {cargando ? "Verificando…" : "Entrar"}
-            </button>
-            <button
-              type="button"
-              className="min-h-12 rounded-lg border-2 border-border px-5 text-base font-semibold"
-              onClick={() => {
-                setPaso("datos");
-                setPin("");
-                setDemo(null);
-                setError(null);
-              }}
-            >
-              Volver y corregir mis datos
-            </button>
-          </form>
-        )}
+        <form onSubmit={enviar} className="mt-8 grid gap-5">
+          <label className="grid gap-2">
+            <span className="text-lg font-semibold">Nombre completo</span>
+            <input
+              className={campo}
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+              maxLength={80}
+              autoComplete="name"
+              required
+            />
+          </label>
+          <label className="grid gap-2">
+            <span className="text-lg font-semibold">Número de teléfono</span>
+            <input
+              className={campo}
+              value={telefono}
+              onChange={(e) => setTelefono(e.target.value)}
+              inputMode="tel"
+              maxLength={20}
+              placeholder="+56 9 1234 5678"
+              autoComplete="tel"
+              required
+            />
+          </label>
+          <label className="grid gap-2">
+            <span className="text-lg font-semibold">PIN de acceso (4 dígitos)</span>
+            <input
+              className={`${campo} text-center text-2xl tracking-[0.5em]`}
+              value={pin}
+              onChange={(e) => setPin(e.target.value.replace(/[^0-9]/g, "").slice(0, 4))}
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              required
+            />
+          </label>
+          <button type="submit" className={accion} disabled={cargando || pin.length !== 4}>
+            {cargando ? "Ingresando…" : "Entrar"}
+          </button>
+        </form>
 
         {error && (
-          <p role="alert" className="mt-6 rounded-lg border-2 border-border px-4 py-3 text-lg font-semibold">
+          <p
+            role="alert"
+            className="mt-6 rounded-lg border-2 border-border px-4 py-3 text-lg font-semibold"
+          >
             {error}
           </p>
         )}
