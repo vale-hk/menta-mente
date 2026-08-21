@@ -124,7 +124,7 @@ function Auth() {
               required
             />
           </label>
-          <button type="submit" className={accion} disabled={cargando || pin.length !== 4}>
+          <button type="submit" className={accion} disabled={cargando}>
             {cargando ? "Ingresando…" : "Entrar"}
           </button>
         </form>
