@@ -1,0 +1,421 @@
+import { useEffect, useMemo, useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { MintLeaf } from "@/components/MintLeaf";
+import { useTema } from "@/hooks/useTema";
+import { iniciarSesionAdmin, validarTokenAdmin } from "@/lib/admin.functions";
+import { comunasRM, registrosAdmin, type RegistroAdmin } from "@/data/adminMock";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+const CLAVE_SESION = "menta-admin-token";
+
+export const Route = createFileRoute("/admin")({
+  ssr: false,
+  head: () => ({
+    meta: [
+      { title: "Panel de administración — Menta" },
+      {
+        name: "description",
+        content:
+          "Panel privado de Menta con indicadores de participación, filtros por edad, sexo y comuna, y rendimiento cognitivo por usuario.",
+      },
+      { property: "og:title", content: "Panel de administración — Menta" },
+      {
+        property: "og:description",
+        content: "Indicadores y tabla de rendimiento cognitivo de las personas usuarias de Menta.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
+  component: Admin,
+});
+
+function Admin() {
+  const { oscuro, alternar } = useTema();
+  const [autorizado, setAutorizado] = useState<boolean | null>(null);
+
+  const validar = useServerFn(validarTokenAdmin);
+
+  useEffect(() => {
+    const token = sessionStorage.getItem(CLAVE_SESION);
+    if (!token) {
+      setAutorizado(false);
+      return;
+    }
+    validar({ data: { token } })
+      .then((r) => {
+        if (!r.valido) sessionStorage.removeItem(CLAVE_SESION);
+        setAutorizado(r.valido);
+      })
+      .catch(() => setAutorizado(false));
+  }, [validar]);
+
+  function salir() {
+    sessionStorage.removeItem(CLAVE_SESION);
+    setAutorizado(false);
+  }
+
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      <header className="border-b border-border">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
+          <Link to="/" className="flex items-center gap-3">
+            <MintLeaf className="h-9 w-9" />
+            <span className="text-2xl font-semibold tracking-tight">Menta</span>
+            <Badge variant="secondary" className="ml-1">
+              Administración
+            </Badge>
+          </Link>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={alternar} aria-pressed={oscuro}>
+              {oscuro ? "Modo claro" : "Modo oscuro"}
+            </Button>
+            {autorizado ? (
+              <Button variant="ghost" onClick={salir}>
+                Cerrar panel
+              </Button>
+            ) : null}
+          </div>
+        </div>
+      </header>
+
+      {autorizado === null ? (
+        <p className="mx-auto max-w-6xl px-4 py-16 text-lg text-muted-foreground">Verificando acceso…</p>
+      ) : autorizado ? (
+        <Dashboard />
+      ) : (
+        <LoginAdmin onOk={() => setAutorizado(true)} />
+      )}
+    </div>
+  );
+}
+
+function LoginAdmin({ onOk }: { onOk: () => void }) {
+  const ingresar = useServerFn(iniciarSesionAdmin);
+  const [clave, setClave] = useState("");
+  const [error, setError] = useState("");
+  const [cargando, setCargando] = useState(false);
+
+  async function enviar(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setCargando(true);
+    try {
+      const r = await ingresar({ data: { clave } });
+      if (!r.ok) {
+        setError("La clave no es correcta.");
+        return;
+      }
+      sessionStorage.setItem(CLAVE_SESION, r.token);
+      onOk();
+    } catch {
+      setError("No fue posible validar el acceso. Intente nuevamente.");
+    } finally {
+      setCargando(false);
+    }
+  }
+
+  return (
+    <main className="mx-auto flex max-w-md flex-col justify-center px-4 py-16">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">Acceso restringido</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="mb-6 text-base text-muted-foreground">
+            Este panel es exclusivo del equipo administrador de Menta. Ingrese su clave de acceso.
+          </p>
+          <form onSubmit={enviar} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="clave-admin" className="text-base">
+                Clave de administración
+              </Label>
+              <Input
+                id="clave-admin"
+                type="password"
+                autoComplete="current-password"
+                value={clave}
+                onChange={(e) => setClave(e.target.value)}
+                className="h-12 text-lg"
+                required
+              />
+            </div>
+            {error ? (
+              <p role="alert" className="text-base font-medium text-destructive">
+                {error}
+              </p>
+            ) : null}
+            <Button type="submit" className="h-12 w-full text-lg" disabled={cargando}>
+              {cargando ? "Verificando…" : "Entrar al panel"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </main>
+  );
+}
+
+type RangoEdad = "todas" | "60-69" | "70-79" | "80+";
+
+function enRango(edad: number, rango: RangoEdad) {
+  if (rango === "todas") return true;
+  if (rango === "60-69") return edad >= 60 && edad <= 69;
+  if (rango === "70-79") return edad >= 70 && edad <= 79;
+  return edad >= 80;
+}
+
+function promedio(nums: number[]) {
+  if (nums.length === 0) return 0;
+  return Math.round(nums.reduce((a, b) => a + b, 0) / nums.length);
+}
+
+function moda(valores: string[]) {
+  const cuenta = new Map<string, number>();
+  valores.forEach((v) => cuenta.set(v, (cuenta.get(v) ?? 0) + 1));
+  let mejor = "—";
+  let max = 0;
+  cuenta.forEach((n, v) => {
+    if (n > max) {
+      max = n;
+      mejor = v;
+    }
+  });
+  return { valor: mejor, cantidad: max };
+}
+
+function fechaCorta(iso: string) {
+  return new Date(iso).toLocaleDateString("es-CL", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
+function Puntaje({ valor }: { valor: number }) {
+  const tono =
+    valor >= 80
+      ? "bg-primary/15 text-primary"
+      : valor >= 60
+        ? "bg-secondary text-secondary-foreground"
+        : "bg-muted text-muted-foreground";
+  return (
+    <span className={`inline-block rounded-md px-2 py-1 text-sm font-semibold ${tono}`}>
+      {valor}%
+    </span>
+  );
+}
+
+function Dashboard() {
+  const [rango, setRango] = useState<RangoEdad>("todas");
+  const [sexo, setSexo] = useState<string>("todos");
+  const [comuna, setComuna] = useState<string>("todas");
+
+  const filtrados: RegistroAdmin[] = useMemo(
+    () =>
+      registrosAdmin.filter(
+        (r) =>
+          enRango(r.edad, rango) &&
+          (sexo === "todos" || r.sexo === sexo) &&
+          (comuna === "todas" || r.comuna === comuna),
+      ),
+    [rango, sexo, comuna],
+  );
+
+  const kpis = useMemo(() => {
+    const areas = [
+      { nombre: "Atención", valor: promedio(filtrados.map((r) => r.atencion)) },
+      { nombre: "Memoria", valor: promedio(filtrados.map((r) => r.memoria)) },
+      { nombre: "Funciones ejecutivas", valor: promedio(filtrados.map((r) => r.funciones)) },
+      { nombre: "Lenguaje", valor: promedio(filtrados.map((r) => r.lenguaje)) },
+    ].sort((a, b) => b.valor - a.valor);
+    const top = areas[0];
+    const comunaTop = moda(filtrados.map((r) => r.comuna));
+    return {
+      total: filtrados.length,
+      comunaTop,
+      edad: promedio(filtrados.map((r) => r.edad)),
+      area: filtrados.length ? top : undefined,
+    };
+  }, [filtrados]);
+
+  const limpiar = () => {
+    setRango("todas");
+    setSexo("todos");
+    setComuna("todas");
+  };
+
+  return (
+    <main className="mx-auto max-w-6xl space-y-8 px-4 py-8">
+      <div>
+        <h1 className="text-3xl font-semibold tracking-tight">Panel de administración</h1>
+        <p className="mt-2 text-base text-muted-foreground">
+          Indicadores de participación y rendimiento cognitivo de las personas usuarias de Menta
+          (datos de demostración).
+        </p>
+      </div>
+
+      <section aria-label="Resumen general" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Kpi titulo="Total de usuarios" valor={String(kpis.total)} detalle="registros visibles" />
+        <Kpi
+          titulo="Comuna con mayor participación"
+          valor={kpis.total ? kpis.comunaTop.valor : "—"}
+          detalle={kpis.total ? `${kpis.comunaTop.cantidad} usuarios` : "sin datos"}
+        />
+        <Kpi
+          titulo="Promedio de edad"
+          valor={kpis.total ? `${kpis.edad} años` : "—"}
+          detalle="según filtros aplicados"
+        />
+        <Kpi
+          titulo="Área cognitiva más ejercitada"
+          valor={kpis.area?.nombre ?? "—"}
+          detalle={kpis.area ? `${kpis.area.valor}% de logro promedio` : "sin datos"}
+        />
+      </section>
+
+      <section
+        aria-label="Filtros"
+        className="grid gap-4 rounded-xl border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-4"
+      >
+        <div className="space-y-2">
+          <Label className="text-base">Rango de edad</Label>
+          <Select value={rango} onValueChange={(v) => setRango(v as RangoEdad)}>
+            <SelectTrigger className="h-11 text-base">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todas">Todas</SelectItem>
+              <SelectItem value="60-69">60-69 años</SelectItem>
+              <SelectItem value="70-79">70-79 años</SelectItem>
+              <SelectItem value="80+">80+ años</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label className="text-base">Sexo</Label>
+          <Select value={sexo} onValueChange={setSexo}>
+            <SelectTrigger className="h-11 text-base">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos</SelectItem>
+              <SelectItem value="Masculino">Masculino</SelectItem>
+              <SelectItem value="Femenino">Femenino</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label className="text-base">Comuna</Label>
+          <Select value={comuna} onValueChange={setComuna}>
+            <SelectTrigger className="h-11 text-base">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todas">Todas las comunas</SelectItem>
+              {comunasRM.map((c) => (
+                <SelectItem key={c} value={c}>
+                  {c}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-end">
+          <Button variant="secondary" className="h-11 w-full text-base" onClick={limpiar}>
+            Limpiar filtros
+          </Button>
+        </div>
+      </section>
+
+      <section aria-label="Rendimiento por usuario" className="rounded-xl border border-border">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Usuario / ID</TableHead>
+                <TableHead>Edad</TableHead>
+                <TableHead>Sexo</TableHead>
+                <TableHead>Comuna</TableHead>
+                <TableHead>Atención</TableHead>
+                <TableHead>Memoria</TableHead>
+                <TableHead>F. ejecutivas</TableHead>
+                <TableHead>Lenguaje</TableHead>
+                <TableHead>Última actividad</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filtrados.map((r) => (
+                <TableRow key={r.id}>
+                  <TableCell className="font-medium">
+                    {r.usuario}
+                    <span className="block text-sm text-muted-foreground">{r.id}</span>
+                  </TableCell>
+                  <TableCell>{r.edad}</TableCell>
+                  <TableCell>{r.sexo}</TableCell>
+                  <TableCell>{r.comuna}</TableCell>
+                  <TableCell>
+                    <Puntaje valor={r.atencion} />
+                  </TableCell>
+                  <TableCell>
+                    <Puntaje valor={r.memoria} />
+                  </TableCell>
+                  <TableCell>
+                    <Puntaje valor={r.funciones} />
+                  </TableCell>
+                  <TableCell>
+                    <Puntaje valor={r.lenguaje} />
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {fechaCorta(r.ultimaActividad)}
+                  </TableCell>
+                </TableRow>
+              ))}
+              {filtrados.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="py-10 text-center text-base text-muted-foreground">
+                    No hay usuarios que cumplan con los filtros seleccionados.
+                  </TableCell>
+                </TableRow>
+              ) : null}
+            </TableBody>
+          </Table>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+function Kpi({ titulo, valor, detalle }: { titulo: string; valor: string; detalle: string }) {
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base font-medium text-muted-foreground">{titulo}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-2xl font-semibold tracking-tight">{valor}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{detalle}</p>
+      </CardContent>
+    </Card>
+  );
+}
