@@ -81,10 +81,10 @@ function generar(): RegistroAdmin[] {
     const puntaje = () => 45 + Math.floor(rnd() * 55);
     return {
       id: `MEN-${String(i + 1).padStart(3, "0")}`,
-      usuario: `${nombres[Math.floor(rnd() * nombres.length)]} ${apellidos[Math.floor(rnd() * apellidos.length)]}`,
+      usuario: `${nombres[Math.floor(rnd() * nombres.length)]!} ${apellidos[Math.floor(rnd() * apellidos.length)]!}`,
       edad,
       sexo,
-      comuna: comunasRM[Math.floor(rnd() * comunasRM.length)],
+      comuna: comunasRM[Math.floor(rnd() * comunasRM.length)]!,
       atencion: puntaje(),
       memoria: puntaje(),
       funciones: puntaje(),
