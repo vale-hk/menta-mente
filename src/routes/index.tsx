@@ -116,11 +116,20 @@ function Index() {
       </main>
 
       <footer className="border-t border-border">
-        <p className="mx-auto max-w-4xl px-5 py-6 text-sm text-muted-foreground">
-          Menta · Material de apoyo fonoaudiológico. No reemplaza la evaluación clínica
-          profesional.
-        </p>
+        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3 px-5 py-6">
+          <p className="text-sm text-muted-foreground">
+            Menta · Material de apoyo fonoaudiológico. No reemplaza la evaluación clínica
+            profesional.
+          </p>
+          <Link
+            to="/admin"
+            className="rounded-md border border-border px-4 py-2 text-sm font-medium hover:bg-accent"
+          >
+            Acceso administración
+          </Link>
+        </div>
       </footer>
+
     </div>
   );
 }
