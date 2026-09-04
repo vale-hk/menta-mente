@@ -79,21 +79,30 @@ export type Database = {
       }
       profiles: {
         Row: {
+          comuna: string | null
           created_at: string
+          edad: number | null
           id: string
           nombre: string
+          sexo: string | null
           telefono: string
         }
         Insert: {
+          comuna?: string | null
           created_at?: string
+          edad?: number | null
           id: string
           nombre: string
+          sexo?: string | null
           telefono: string
         }
         Update: {
+          comuna?: string | null
           created_at?: string
+          edad?: number | null
           id?: string
           nombre?: string
+          sexo?: string | null
           telefono?: string
         }
         Relationships: []
