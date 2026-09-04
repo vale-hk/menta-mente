@@ -26,6 +26,7 @@ const CATEGORIAS = {
 export const obtenerRegistrosAdmin = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ token: z.string().max(300) }).parse(input))
   .handler(async ({ data }): Promise<{ ok: boolean; registros: RegistroAdminDB[] }> => {
+    const { validarTokenAdminServidor } = await import("./adminToken.server");
     const valido = await validarTokenAdminServidor(data.token);
     if (!valido) return { ok: false, registros: [] };
 
