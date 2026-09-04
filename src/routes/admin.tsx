@@ -4,6 +4,17 @@ import { useServerFn } from "@tanstack/react-start";
 import { MintLeaf } from "@/components/MintLeaf";
 import { useTema } from "@/hooks/useTema";
 import { iniciarSesionAdmin, validarTokenAdmin } from "@/lib/admin.functions";
+import { obtenerRegistrosAdmin, type RegistroAdminDB } from "@/lib/adminDatos.functions";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { comunasRM, registrosAdmin, type RegistroAdmin } from "@/data/adminMock";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -212,52 +223,115 @@ function fechaCorta(iso: string) {
   });
 }
 
-function Puntaje({ valor }: { valor: number }) {
-  const tono =
-    valor >= 80
-      ? "bg-primary/15 text-primary"
-      : valor >= 60
-        ? "bg-secondary text-secondary-foreground"
-        : "bg-muted text-muted-foreground";
+const CLASE_SELECT_CONTENT = "bg-white text-slate-900 dark:bg-black dark:text-white";
+const CLASE_SELECT_ITEM =
+  "focus:bg-emerald-100 focus:text-emerald-950 data-[state=checked]:bg-emerald-100 data-[state=checked]:text-emerald-950 dark:focus:bg-emerald-900 dark:focus:text-white dark:data-[state=checked]:bg-emerald-900 dark:data-[state=checked]:text-white";
+
+/** Código de colores de logro solicitado para la tabla. */
+function tonoLogro(valor: number) {
+  if (valor <= 45) return { texto: "text-red-600", fondo: "bg-red-100 dark:bg-red-950/60", hex: "#dc2626" };
+  if (valor <= 75)
+    return { texto: "text-yellow-500", fondo: "bg-yellow-100 dark:bg-yellow-950/60", hex: "#eab308" };
+  if (valor <= 89)
+    return { texto: "text-emerald-400", fondo: "bg-emerald-100 dark:bg-emerald-950/60", hex: "#34d399" };
+  return { texto: "text-green-800", fondo: "bg-green-100 dark:bg-green-950/60", hex: "#166534" };
+}
+
+function Puntaje({ valor }: { valor: number | null }) {
+  if (valor === null) {
+    return <span className="text-sm text-muted-foreground">Sin datos</span>;
+  }
+  const tono = tonoLogro(valor);
   return (
-    <span className={`inline-block rounded-md px-2 py-1 text-sm font-semibold ${tono}`}>
+    <span
+      className={`inline-block rounded-md px-2 py-1 text-sm font-bold ${tono.fondo} ${tono.texto}`}
+    >
       {valor}%
     </span>
   );
 }
+
+function aRegistroDB(r: RegistroAdmin): RegistroAdminDB {
+  return {
+    id: r.id,
+    usuario: r.usuario,
+    edad: r.edad,
+    sexo: r.sexo,
+    comuna: r.comuna,
+    atencion: r.atencion,
+    memoria: r.memoria,
+    funciones: r.funciones,
+    lenguaje: r.lenguaje,
+    ultimaActividad: r.ultimaActividad,
+  };
+}
+
+const AREAS = [
+  { clave: "atencion", nombre: "Atención" },
+  { clave: "memoria", nombre: "Memoria" },
+  { clave: "funciones", nombre: "Funciones ejecutivas" },
+  { clave: "lenguaje", nombre: "Lenguaje" },
+] as const;
 
 function Dashboard() {
   const [rango, setRango] = useState<RangoEdad>("todas");
   const [sexo, setSexo] = useState<string>("todos");
   const [comuna, setComuna] = useState<string>("todas");
 
-  const filtrados: RegistroAdmin[] = useMemo(
+  const cargarRegistros = useServerFn(obtenerRegistrosAdmin);
+  const [reales, setReales] = useState<RegistroAdminDB[] | null>(null);
+
+  useEffect(() => {
+    const token = sessionStorage.getItem(CLAVE_SESION);
+    if (!token) return;
+    cargarRegistros({ data: { token } })
+      .then((r) => setReales(r.ok ? r.registros : []))
+      .catch(() => setReales([]));
+  }, [cargarRegistros]);
+
+  const conDatosReales = (reales?.length ?? 0) > 0;
+  const fuente: RegistroAdminDB[] = useMemo(
+    () => (conDatosReales ? reales! : registrosAdmin.map(aRegistroDB)),
+    [conDatosReales, reales],
+  );
+
+  const comunas = useMemo(() => {
+    const set = new Set<string>(comunasRM as readonly string[]);
+    fuente.forEach((r) => r.comuna && set.add(r.comuna));
+    return Array.from(set).sort((a, b) => a.localeCompare(b, "es"));
+  }, [fuente]);
+
+  const filtrados = useMemo(
     () =>
-      registrosAdmin.filter(
+      fuente.filter(
         (r) =>
-          enRango(r.edad, rango) &&
+          (rango === "todas" || (r.edad !== null && enRango(r.edad, rango))) &&
           (sexo === "todos" || r.sexo === sexo) &&
           (comuna === "todas" || r.comuna === comuna),
       ),
-    [rango, sexo, comuna],
+    [fuente, rango, sexo, comuna],
+  );
+
+  const areas = useMemo(
+    () =>
+      AREAS.map((a) => ({
+        nombre: a.nombre,
+        valor: promedio(filtrados.map((r) => r[a.clave]).filter((v): v is number => v !== null)),
+      })),
+    [filtrados],
   );
 
   const kpis = useMemo(() => {
-    const areas = [
-      { nombre: "Atención", valor: promedio(filtrados.map((r) => r.atencion)) },
-      { nombre: "Memoria", valor: promedio(filtrados.map((r) => r.memoria)) },
-      { nombre: "Funciones ejecutivas", valor: promedio(filtrados.map((r) => r.funciones)) },
-      { nombre: "Lenguaje", valor: promedio(filtrados.map((r) => r.lenguaje)) },
-    ].sort((a, b) => b.valor - a.valor);
-    const top = areas[0];
-    const comunaTop = moda(filtrados.map((r) => r.comuna));
+    const conDatos = areas.filter((a) => a.valor > 0);
+    const orden = [...conDatos].sort((a, b) => b.valor - a.valor);
     return {
       total: filtrados.length,
-      comunaTop,
-      edad: promedio(filtrados.map((r) => r.edad)),
-      area: filtrados.length ? top : undefined,
+      comunaTop: moda(filtrados.map((r) => r.comuna ?? "Sin registrar")),
+      edad: promedio(filtrados.map((r) => r.edad).filter((v): v is number => v !== null)),
+      mejor: orden[0],
+      peor: orden[orden.length - 1],
     };
-  }, [filtrados]);
+  }, [areas, filtrados]);
 
   const limpiar = () => {
     setRango("todas");
@@ -270,8 +344,11 @@ function Dashboard() {
       <div>
         <h1 className="text-3xl font-semibold tracking-tight">Panel de administración</h1>
         <p className="mt-2 text-base text-muted-foreground">
-          Indicadores de participación y rendimiento cognitivo de las personas usuarias de Menta
-          (datos de demostración).
+          {reales === null
+            ? "Cargando información de la nube…"
+            : conDatosReales
+              ? "Indicadores calculados con la actividad real registrada por las personas usuarias de Menta."
+              : "Aún no hay actividad registrada en la nube: se muestran datos de demostración."}
         </p>
       </div>
 
@@ -283,15 +360,47 @@ function Dashboard() {
           detalle={kpis.total ? `${kpis.comunaTop.cantidad} usuarios` : "sin datos"}
         />
         <Kpi
-          titulo="Promedio de edad"
-          valor={kpis.total ? `${kpis.edad} años` : "—"}
-          detalle="según filtros aplicados"
+          titulo="Área con mayor logro"
+          valor={kpis.mejor?.nombre ?? "—"}
+          detalle={kpis.mejor ? `${kpis.mejor.valor}% de logro promedio` : "sin datos"}
         />
         <Kpi
-          titulo="Área cognitiva más ejercitada"
-          valor={kpis.area?.nombre ?? "—"}
-          detalle={kpis.area ? `${kpis.area.valor}% de logro promedio` : "sin datos"}
+          titulo="Área con menor logro"
+          valor={kpis.peor?.nombre ?? "—"}
+          detalle={kpis.peor ? `${kpis.peor.valor}% de logro promedio` : "sin datos"}
         />
+      </section>
+
+      <section aria-label="Rendimiento promedio por área">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl">Rendimiento promedio por área cognitiva</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-72 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={areas} margin={{ top: 8, right: 8, bottom: 8, left: -16 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.15} />
+                  <XAxis dataKey="nombre" tick={{ fontSize: 12, fill: "currentColor" }} interval={0} />
+                  <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: "currentColor" }} />
+                  <Tooltip
+                    formatter={(v: number) => [`${v}%`, "Logro promedio"]}
+                    contentStyle={{ borderRadius: 8 }}
+                  />
+                  <Bar dataKey="valor" radius={[6, 6, 0, 0]}>
+                    {areas.map((a) => (
+                      <Cell key={a.nombre} fill={tonoLogro(a.valor).hex} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Promedio de logro (%) según los filtros aplicados. Promedio de edad:{" "}
+              {kpis.total && kpis.edad ? `${kpis.edad} años` : "sin datos"}.
+            </p>
+          </CardContent>
+        </Card>
       </section>
 
       <section
@@ -304,11 +413,11 @@ function Dashboard() {
             <SelectTrigger className="h-11 text-base">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todas">Todas</SelectItem>
-              <SelectItem value="60-69">60-69 años</SelectItem>
-              <SelectItem value="70-79">70-79 años</SelectItem>
-              <SelectItem value="80+">80+ años</SelectItem>
+            <SelectContent className={CLASE_SELECT_CONTENT}>
+              <SelectItem className={CLASE_SELECT_ITEM} value="todas">Todas</SelectItem>
+              <SelectItem className={CLASE_SELECT_ITEM} value="60-69">60-69 años</SelectItem>
+              <SelectItem className={CLASE_SELECT_ITEM} value="70-79">70-79 años</SelectItem>
+              <SelectItem className={CLASE_SELECT_ITEM} value="80+">80+ años</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -318,10 +427,10 @@ function Dashboard() {
             <SelectTrigger className="h-11 text-base">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todos">Todos</SelectItem>
-              <SelectItem value="Masculino">Masculino</SelectItem>
-              <SelectItem value="Femenino">Femenino</SelectItem>
+            <SelectContent className={CLASE_SELECT_CONTENT}>
+              <SelectItem className={CLASE_SELECT_ITEM} value="todos">Todos</SelectItem>
+              <SelectItem className={CLASE_SELECT_ITEM} value="Masculino">Masculino</SelectItem>
+              <SelectItem className={CLASE_SELECT_ITEM} value="Femenino">Femenino</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -331,10 +440,10 @@ function Dashboard() {
             <SelectTrigger className="h-11 text-base">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todas">Todas las comunas</SelectItem>
-              {comunasRM.map((c) => (
-                <SelectItem key={c} value={c}>
+            <SelectContent className={CLASE_SELECT_CONTENT}>
+              <SelectItem className={CLASE_SELECT_ITEM} value="todas">Todas las comunas</SelectItem>
+              {comunas.map((c) => (
+                <SelectItem className={CLASE_SELECT_ITEM} key={c} value={c}>
                   {c}
                 </SelectItem>
               ))}
@@ -371,9 +480,9 @@ function Dashboard() {
                     {r.usuario}
                     <span className="block text-sm text-muted-foreground">{r.id}</span>
                   </TableCell>
-                  <TableCell>{r.edad}</TableCell>
-                  <TableCell>{r.sexo}</TableCell>
-                  <TableCell>{r.comuna}</TableCell>
+                  <TableCell>{r.edad ?? "—"}</TableCell>
+                  <TableCell>{r.sexo ?? "—"}</TableCell>
+                  <TableCell>{r.comuna ?? "—"}</TableCell>
                   <TableCell>
                     <Puntaje valor={r.atencion} />
                   </TableCell>
@@ -387,7 +496,7 @@ function Dashboard() {
                     <Puntaje valor={r.lenguaje} />
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
-                    {fechaCorta(r.ultimaActividad)}
+                    {r.ultimaActividad ? fechaCorta(r.ultimaActividad) : "—"}
                   </TableCell>
                 </TableRow>
               ))}
