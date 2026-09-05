@@ -5,6 +5,7 @@ import { MintLeaf } from "@/components/MintLeaf";
 import { useTema } from "@/hooks/useTema";
 import { iniciarSesionAdmin, validarTokenAdmin } from "@/lib/admin.functions";
 import { obtenerRegistrosAdmin, type RegistroAdminDB } from "@/lib/adminDatos.functions";
+import { generarDatosDemo } from "@/lib/adminDemo.functions";
 import {
   Bar,
   BarChart,
@@ -279,7 +280,10 @@ function Dashboard() {
   const [comuna, setComuna] = useState<string>("todas");
 
   const cargarRegistros = useServerFn(obtenerRegistrosAdmin);
+  const generarDemo = useServerFn(generarDatosDemo);
   const [reales, setReales] = useState<RegistroAdminDB[] | null>(null);
+  const [generando, setGenerando] = useState(false);
+  const [mensajeDemo, setMensajeDemo] = useState("");
 
   useEffect(() => {
     const token = sessionStorage.getItem(CLAVE_SESION);
@@ -288,6 +292,23 @@ function Dashboard() {
       .then((r) => setReales(r.ok ? r.registros : []))
       .catch(() => setReales([]));
   }, [cargarRegistros]);
+
+  async function generarDatos() {
+    const token = sessionStorage.getItem(CLAVE_SESION);
+    if (!token || generando) return;
+    setGenerando(true);
+    setMensajeDemo("");
+    try {
+      const r = await generarDemo({ data: { token } });
+      setMensajeDemo(r.mensaje);
+      const act = await cargarRegistros({ data: { token } });
+      setReales(act.ok ? act.registros : []);
+    } catch {
+      setMensajeDemo("No fue posible generar los datos de demostración.");
+    } finally {
+      setGenerando(false);
+    }
+  }
 
   const conDatosReales = (reales?.length ?? 0) > 0;
   const fuente: RegistroAdminDB[] = useMemo(
@@ -350,6 +371,16 @@ function Dashboard() {
               ? "Indicadores calculados con la actividad real registrada por las personas usuarias de Menta."
               : "Aún no hay actividad registrada en la nube: se muestran datos de demostración."}
         </p>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <Button variant="secondary" onClick={generarDatos} disabled={generando}>
+            {generando ? "Generando datos…" : "Generar 50 usuarios de demostración"}
+          </Button>
+          {mensajeDemo ? (
+            <p role="status" className="text-sm text-muted-foreground">
+              {mensajeDemo}
+            </p>
+          ) : null}
+        </div>
       </div>
 
       <section aria-label="Resumen general" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
