@@ -5,6 +5,7 @@ import { MintLeaf } from "@/components/MintLeaf";
 import { useTema } from "@/hooks/useTema";
 import { iniciarSesionAdmin, validarTokenAdmin } from "@/lib/admin.functions";
 import { obtenerRegistrosAdmin, type RegistroAdminDB } from "@/lib/adminDatos.functions";
+import { generarDatosDemo } from "@/lib/adminDemo.functions";
 import {
   Bar,
   BarChart,
