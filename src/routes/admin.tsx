@@ -371,6 +371,16 @@ function Dashboard() {
               ? "Indicadores calculados con la actividad real registrada por las personas usuarias de Menta."
               : "Aún no hay actividad registrada en la nube: se muestran datos de demostración."}
         </p>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <Button variant="secondary" onClick={generarDatos} disabled={generando}>
+            {generando ? "Generando datos…" : "Generar 50 usuarios de demostración"}
+          </Button>
+          {mensajeDemo ? (
+            <p role="status" className="text-sm text-muted-foreground">
+              {mensajeDemo}
+            </p>
+          ) : null}
+        </div>
       </div>
 
       <section aria-label="Resumen general" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
