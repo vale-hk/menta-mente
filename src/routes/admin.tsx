@@ -408,12 +408,23 @@ function Dashboard() {
             <CardTitle className="text-xl">Rendimiento promedio por área cognitiva</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-72 w-full">
+            <div className="h-80 w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={areas} margin={{ top: 8, right: 8, bottom: 8, left: -16 }}>
+                <BarChart data={areas} margin={{ top: 8, right: 8, bottom: 40, left: -8 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.15} />
-                  <XAxis dataKey="nombre" tick={{ fontSize: 12, fill: "currentColor" }} interval={0} />
-                  <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: "currentColor" }} />
+                  <XAxis
+                    dataKey="nombre"
+                    interval={0}
+                    angle={-35}
+                    textAnchor="end"
+                    height={60}
+                    tick={{ fontSize: 11, fill: "currentColor" }}
+                  />
+                  <YAxis
+                    domain={[0, 100]}
+                    tick={{ fontSize: 12, fill: "currentColor" }}
+                    label={{ value: "% logro", angle: -90, position: "insideLeft", fontSize: 12 }}
+                  />
                   <Tooltip
                     formatter={(v: number) => [`${v}%`, "Logro promedio"]}
                     contentStyle={{ borderRadius: 8 }}
