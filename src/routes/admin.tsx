@@ -280,7 +280,10 @@ function Dashboard() {
   const [comuna, setComuna] = useState<string>("todas");
 
   const cargarRegistros = useServerFn(obtenerRegistrosAdmin);
+  const generarDemo = useServerFn(generarDatosDemo);
   const [reales, setReales] = useState<RegistroAdminDB[] | null>(null);
+  const [generando, setGenerando] = useState(false);
+  const [mensajeDemo, setMensajeDemo] = useState("");
 
   useEffect(() => {
     const token = sessionStorage.getItem(CLAVE_SESION);
@@ -289,6 +292,23 @@ function Dashboard() {
       .then((r) => setReales(r.ok ? r.registros : []))
       .catch(() => setReales([]));
   }, [cargarRegistros]);
+
+  async function generarDatos() {
+    const token = sessionStorage.getItem(CLAVE_SESION);
+    if (!token || generando) return;
+    setGenerando(true);
+    setMensajeDemo("");
+    try {
+      const r = await generarDemo({ data: { token } });
+      setMensajeDemo(r.mensaje);
+      const act = await cargarRegistros({ data: { token } });
+      setReales(act.ok ? act.registros : []);
+    } catch {
+      setMensajeDemo("No fue posible generar los datos de demostración.");
+    } finally {
+      setGenerando(false);
+    }
+  }
 
   const conDatosReales = (reales?.length ?? 0) > 0;
   const fuente: RegistroAdminDB[] = useMemo(
