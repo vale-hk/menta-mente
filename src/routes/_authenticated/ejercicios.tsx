@@ -1,14 +1,13 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { supabase } from "@/integrations/supabase/client";
 import { RegistroProvider } from "@/components/RegistroProgreso";
 import { registrarActividad } from "@/lib/progreso.functions";
-import { useTema } from "@/hooks/useTema";
-import { MintLeaf } from "@/components/MintLeaf";
+import { IntranetShell } from "@/components/IntranetShell";
 import { EjercicioInteractivo } from "@/components/EjercicioInteractivo";
 import { categorias, ejercicios, type Categoria } from "@/data/ejercicios";
+
 
 export const Route = createFileRoute("/_authenticated/ejercicios")({
   head: () => ({
