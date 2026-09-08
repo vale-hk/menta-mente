@@ -140,8 +140,8 @@ function Progreso() {
               </section>
             );
           })}
-        </div>
-      </main>
-    </div>
+      </div>
+    </IntranetShell>
   );
+
 }
