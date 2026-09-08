@@ -57,9 +57,6 @@ function mensajeAnimo(total: number, ultimaSemana: number, promedio: number) {
 }
 
 function Progreso() {
-  const { oscuro, alternar } = useTema();
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const cargarProgreso = useServerFn(obtenerProgreso);
 
   const { data, isLoading } = useQuery({
@@ -74,54 +71,15 @@ function Progreso() {
   const ultimaSemana = registros.filter((r) => new Date(r.fecha_ejecucion).getTime() >= hace7).length;
   const nivel = Math.round((promedio / 10) * 100);
 
-  async function salir() {
-    await queryClient.cancelQueries();
-    queryClient.clear();
-    await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
-  }
-
   return (
-    <div className="min-h-dvh">
-      <header className="border-b border-border">
-        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-4 px-5 py-6">
-          <Link to="/" className="flex items-center gap-3">
-            <MintLeaf className="size-10 text-primary" />
-            <span className="font-serif text-3xl font-semibold tracking-tight">Menta</span>
-          </Link>
-          <div className="flex flex-wrap gap-3">
-            <Link
-              to="/ejercicios"
-              className="min-h-12 rounded-lg border-2 border-border px-5 py-2 text-base font-semibold leading-8"
-            >
-              Ejercicios
-            </Link>
-            <button
-              type="button"
-              onClick={alternar}
-              aria-pressed={oscuro}
-              className="min-h-12 rounded-lg border-2 border-border bg-secondary px-5 py-2 text-base font-semibold text-secondary-foreground"
-            >
-              {oscuro ? "Modo claro" : "Modo oscuro"}
-            </button>
-            <button
-              type="button"
-              onClick={salir}
-              className="min-h-12 rounded-lg border-2 border-border px-5 py-2 text-base font-semibold"
-            >
-              Cerrar sesión
-            </button>
-          </div>
-        </div>
-      </header>
+    <IntranetShell>
+      <h1 className="font-serif text-3xl font-semibold">
+        Hola{data?.nombre ? `, ${data.nombre}` : ""}
+      </h1>
+      <p className="mt-2 text-muted-foreground">
+        Este es su espacio privado. Solo usted puede ver estos registros.
+      </p>
 
-      <main className="mx-auto max-w-4xl px-5 py-10">
-        <h1 className="font-serif text-3xl font-semibold">
-          Hola{data?.nombre ? `, ${data.nombre}` : ""}
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          Este es su espacio privado. Solo usted puede ver estos registros.
-        </p>
 
         <section className="surface-card mt-8 p-6" aria-labelledby="nivel">
           <h2 id="nivel" className="font-serif text-2xl font-semibold">
