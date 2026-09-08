@@ -1,11 +1,10 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { MintLeaf } from "@/components/MintLeaf";
-import { useTema } from "@/hooks/useTema";
-import { supabase } from "@/integrations/supabase/client";
+import { IntranetShell } from "@/components/IntranetShell";
 import { obtenerProgreso } from "@/lib/progreso.functions";
 import { categorias } from "@/data/ejercicios";
+
 
 export const Route = createFileRoute("/_authenticated/progreso")({
   head: () => ({
