@@ -60,7 +60,7 @@ function Ejercicios() {
 
   return (
     <IntranetShell>
-      <h1 className="font-serif text-3xl font-semibold">Elija un área de trabajo</h1>
+      <h1 className="font-serif text-3xl font-semibold text-primary">Elija un área de trabajo</h1>
       <p className="mt-2 max-w-2xl text-muted-foreground">
         Cada actividad se resuelve directamente en la pantalla y su puntaje se guarda
         automáticamente en su progreso.
