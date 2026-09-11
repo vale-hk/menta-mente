@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTema } from "@/hooks/useTema";
-import { MintLeaf } from "@/components/MintLeaf";
+import { MarcaMenta } from "@/components/MarcaMenta";
+import { IconoCategoria } from "@/components/IconoCategoria";
 import { categorias } from "@/data/ejercicios";
 
 export const Route = createFileRoute("/")({

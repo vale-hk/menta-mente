@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
+import { IconoCategoria } from "@/components/IconoCategoria";
 import { RegistroProvider } from "@/components/RegistroProgreso";
 import { registrarActividad } from "@/lib/progreso.functions";
 import { IntranetShell } from "@/components/IntranetShell";
@@ -48,6 +50,7 @@ function Ejercicios() {
       })
         .then(() => {
           setAviso(`Guardamos su resultado: ${puntaje} de 10 puntos.`);
+          toast.success("¡Excelente esfuerzo, siga fortaleciendo su mente!", { duration: 5000 });
           queryClient.invalidateQueries({ queryKey: ["progreso"] });
         })
         .catch(() => setAviso("No pudimos guardar su avance. Intente más tarde."));
@@ -60,7 +63,7 @@ function Ejercicios() {
 
   return (
     <IntranetShell>
-      <h1 className="font-serif text-3xl font-semibold">Elija un área de trabajo</h1>
+      <h1 className="font-serif text-3xl font-semibold text-primary">Elija un área de trabajo</h1>
       <p className="mt-2 max-w-2xl text-muted-foreground">
         Cada actividad se resuelve directamente en la pantalla y su puntaje se guarda
         automáticamente en su progreso.
@@ -91,7 +94,10 @@ function Ejercicios() {
       )}
 
       <section aria-live="polite" className="mt-8">
-        <h2 className="font-serif text-2xl font-semibold">{actual.titulo}</h2>
+        <h2 className="flex items-center gap-3 font-serif text-2xl font-semibold text-primary">
+          <IconoCategoria categoria={actual.id} />
+          {actual.titulo}
+        </h2>
         <p className="mt-1 text-muted-foreground">{actual.resumen}</p>
         <div className="mt-6 grid gap-6">
           <RegistroProvider registrar={registrar}>
