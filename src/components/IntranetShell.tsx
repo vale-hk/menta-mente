@@ -63,25 +63,29 @@ export function IntranetShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-dvh pb-24 md:pb-0">
-      <header className="border-b border-border">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-5 py-6">
-          <Link to="/" className="flex items-center gap-3">
-            <MintLeaf className="size-10 text-primary" />
-            <span className="font-serif text-3xl font-semibold tracking-tight">Menta</span>
+      <header className="sticky top-0 z-40 border-b-4 border-brand bg-brand">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-5 py-4">
+          <Link to="/" aria-label="Menta, volver al menú principal">
+            <MarcaMenta subtitulo="Volver al inicio" />
           </Link>
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={alternar}
-              aria-pressed={oscuro}
-              className="min-h-12 rounded-lg border-2 border-border bg-secondary px-5 py-2 text-base font-semibold text-secondary-foreground"
-            >
-              {oscuro ? "Modo claro" : "Modo oscuro"}
-            </button>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-col items-start">
+              <button
+                type="button"
+                onClick={alternar}
+                aria-pressed={oscuro}
+                className="min-h-12 rounded-lg border-2 border-brand-foreground bg-brand-foreground/10 px-5 py-2 text-base font-semibold text-brand-foreground"
+              >
+                {oscuro ? "Modo claro" : "Modo oscuro"}
+              </button>
+              <span className="mt-1 text-xs text-brand-foreground/85">
+                Modo oscuro para baja visión
+              </span>
+            </div>
             <button
               type="button"
               onClick={salir}
-              className="min-h-12 rounded-lg border-2 border-border px-5 py-2 text-base font-semibold"
+              className="min-h-12 rounded-lg border-2 border-brand-foreground px-5 py-2 text-base font-semibold text-brand-foreground"
             >
               Cerrar sesión
             </button>
