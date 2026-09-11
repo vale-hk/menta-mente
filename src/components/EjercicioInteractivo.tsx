@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Lightbulb } from "lucide-react";
 import type { Ejercicio } from "@/data/ejercicios";
 import { useRegistroEjercicio } from "@/components/RegistroProgreso";
 
