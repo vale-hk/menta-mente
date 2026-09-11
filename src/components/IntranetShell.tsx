@@ -2,7 +2,7 @@ import { useState, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { MintLeaf } from "@/components/MintLeaf";
+import { MarcaMenta } from "@/components/MarcaMenta";
 import { useTema } from "@/hooks/useTema";
 import { supabase } from "@/integrations/supabase/client";
 import { obtenerPerfil, guardarPerfil } from "@/lib/perfil.functions";

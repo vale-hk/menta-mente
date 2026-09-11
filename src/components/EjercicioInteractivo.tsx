@@ -570,11 +570,51 @@ function VerdaderoFalso({ ej }: { ej: Extract<Ejercicio, { tipo: "verdadero-fals
   );
 }
 
+function pista(ej: Ejercicio) {
+  switch (ej.tipo) {
+    case "opcion-multiple":
+      return "Lea todas las alternativas en voz alta y descarte primero las que claramente no corresponden.";
+    case "seleccion-multiple":
+      return "Revise la lista de a uno, sin apuro, y marque solo los que cumplen la condición pedida.";
+    case "orden":
+      return "Piense qué paso debe hacerse primero en la vida real y siga la secuencia natural.";
+    case "emparejar":
+      return "Empiece por las parejas más evidentes; así quedan menos opciones para las difíciles.";
+    case "texto":
+      return "Responda con una sola palabra. No importan las tildes ni las mayúsculas.";
+    case "memoria-lista":
+      return "Agrupe las palabras por temas (comidas, objetos, lugares) para recordarlas mejor.";
+    case "clasificar":
+      return "Pregúntese a qué grupo pertenece cada elemento en su uso cotidiano.";
+    case "verdadero-falso":
+      return "Lea la frase completa antes de decidir: una sola palabra puede cambiar la respuesta.";
+    default:
+      return "Tómese su tiempo: puede reiniciar la actividad cuantas veces quiera.";
+  }
+}
+
 export function EjercicioInteractivo({ ejercicio }: { ejercicio: Ejercicio }) {
+  const [verPista, setVerPista] = useState(false);
   return (
-    <article className="surface-card p-6">
-      <h3 className="font-serif text-2xl font-semibold">{ejercicio.titulo}</h3>
+    <article className="surface-card border-2 border-brand p-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <h3 className="font-serif text-2xl font-semibold text-primary">{ejercicio.titulo}</h3>
+        <button
+          type="button"
+          onClick={() => setVerPista((v) => !v)}
+          aria-expanded={verPista}
+          className="inline-flex min-h-12 items-center gap-2 rounded-lg border-2 border-primary px-4 py-2 text-base font-semibold text-primary"
+        >
+          <Lightbulb className="size-6" aria-hidden="true" />
+          {verPista ? "Ocultar ayuda" : "Ayuda"}
+        </button>
+      </div>
       <p className="mt-2 text-muted-foreground">{ejercicio.instrucciones}</p>
+      {verPista && (
+        <p role="status" className="mt-3 rounded-lg border-2 border-primary bg-secondary p-4 text-lg text-secondary-foreground">
+          Pista: {pista(ejercicio)}
+        </p>
+      )}
       {ejercicio.tipo === "opcion-multiple" && <OpcionMultiple ej={ejercicio} />}
       {ejercicio.tipo === "seleccion-multiple" && <SeleccionMultiple ej={ejercicio} />}
       {ejercicio.tipo === "orden" && <Orden ej={ejercicio} />}
