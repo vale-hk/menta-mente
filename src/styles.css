@@ -26,6 +26,7 @@
   --color-ring: var(--ring);
   --color-brand: var(--brand);
   --color-brand-foreground: var(--brand-foreground);
+  --color-brand-soft: var(--brand-soft);
   --font-sans: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Fraunces", ui-serif, Georgia, serif;
 }
@@ -46,8 +47,9 @@
   --accent-foreground: oklch(0.27 0.03 158);
   --border: oklch(0.88 0.02 150);
   --ring: oklch(0.48 0.075 160);
-  --brand: oklch(0.44 0.085 162);
+  --brand: oklch(0.596 0.145 163);
   --brand-foreground: oklch(0.99 0.005 145);
+  --brand-soft: oklch(0.845 0.095 164);
 }
 
 .dark {
@@ -67,6 +69,7 @@
   --ring: oklch(1 0 0);
   --brand: oklch(0 0 0);
   --brand-foreground: oklch(1 0 0);
+  --brand-soft: oklch(1 0 0);
 }
 
 @layer base {

@@ -19,9 +19,9 @@ export function IconoCategoria({
   return (
     <span
       aria-hidden="true"
-      className={`inline-flex size-14 shrink-0 items-center justify-center rounded-full bg-brand text-brand-foreground ${className ?? ""}`}
+      className={`inline-flex size-14 shrink-0 items-center justify-center text-primary ${className ?? ""}`}
     >
-      <Icono className="size-8" strokeWidth={2.2} />
+      <Icono className="size-10" strokeWidth={2.2} />
     </span>
   );
 }
