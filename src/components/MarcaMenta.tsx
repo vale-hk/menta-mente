@@ -1,17 +1,9 @@
-import { MintLeaf } from "@/components/MintLeaf";
+import { LOGO_DATA_URI } from "@/lib/logoMenta";
 
 export function MarcaMenta({ subtitulo }: { subtitulo?: string }) {
   return (
-    <span className="inline-flex max-w-full items-center gap-3 rounded-full border-2 border-white bg-white px-4 py-2 shadow-sm">
-      <MintLeaf className="size-12 shrink-0 text-emerald-600 sm:size-14" />
-      <span className="min-w-0">
-        <span className="block font-serif text-4xl font-semibold text-emerald-700">
-          Menta
-        </span>
-        <span className="block text-sm font-semibold text-emerald-800" title={subtitulo}>
-          Mentaliza, Memoriza &amp; Mejora.
-        </span>
-      </span>
+    <span className="inline-flex max-w-full items-center rounded-2xl border-2 border-white bg-white px-2 py-1 shadow-sm" title={subtitulo}>
+      <img src={LOGO_DATA_URI} alt="Menta — Mentaliza, Memoriza & Mejora." className="h-16 w-auto sm:h-20" />
     </span>
   );
 }
