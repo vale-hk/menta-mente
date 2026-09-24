@@ -27,6 +27,7 @@
   --color-brand: var(--brand);
   --color-brand-foreground: var(--brand-foreground);
   --color-brand-soft: var(--brand-soft);
+  --color-card-border: var(--card-border);
   --font-sans: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Fraunces", ui-serif, Georgia, serif;
 }
@@ -50,6 +51,7 @@
   --brand: oklch(0.596 0.145 163);
   --brand-foreground: oklch(0.99 0.005 145);
   --brand-soft: oklch(0.845 0.095 164);
+  --card-border: oklch(0.56 0.085 160);
 }
 
 .dark {
@@ -70,6 +72,7 @@
   --brand: oklch(0 0 0);
   --brand-foreground: oklch(1 0 0);
   --brand-soft: oklch(1 0 0);
+  --card-border: oklch(1 0 0);
 }
 
 @layer base {
@@ -98,6 +101,6 @@
 @utility surface-card {
   background-color: var(--color-card);
   color: var(--color-card-foreground);
-  border: 1px solid var(--color-border);
+  border: 3px solid var(--color-card-border);
   border-radius: var(--radius-xl);
 }

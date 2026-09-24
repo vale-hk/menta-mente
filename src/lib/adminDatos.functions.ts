@@ -29,6 +29,12 @@ const CATEGORIAS = {
   lenguaje: "lenguaje",
 } as const;
 
+/** Convierte un puntaje (0–10 o ya en %) a porcentaje acotado entre 0 y 100. */
+function aPorcentaje(p: number) {
+  const v = p <= 10 ? p * 10 : p;
+  return Math.max(0, Math.min(100, v));
+}
+
 /** Entrega los registros reales de la base de datos para el panel de administración. */
 export const obtenerRegistrosAdmin = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ token: z.string().max(300) }).parse(input))
@@ -58,7 +64,7 @@ export const obtenerRegistrosAdmin = createServerFn({ method: "POST" })
       if (!clave) continue;
       const actual = acumulado.get(log.user_id) ?? { sumas: {}, ultima: null };
       const celda = actual.sumas[clave] ?? { total: 0, n: 0 };
-      celda.total += log.puntaje;
+      celda.total += aPorcentaje(log.puntaje);
       celda.n += 1;
       actual.sumas[clave] = celda;
       if (!actual.ultima || log.fecha_ejecucion > actual.ultima) actual.ultima = log.fecha_ejecucion;
@@ -66,7 +72,7 @@ export const obtenerRegistrosAdmin = createServerFn({ method: "POST" })
     }
 
     const prom = (v?: { total: number; n: number }) =>
-      v && v.n > 0 ? Math.round((v.total / v.n) * 10) : null;
+      v && v.n > 0 ? Math.min(100, Math.round(v.total / v.n)) : null;
 
     const registros: RegistroAdminDB[] = (perfiles ?? []).map((p) => {
       const a = acumulado.get(p.id);
@@ -88,7 +94,7 @@ export const obtenerRegistrosAdmin = createServerFn({ method: "POST" })
     for (const log of logs ?? []) {
       const periodo = String(log.fecha_ejecucion).slice(0, 7);
       const actual = porMes.get(periodo) ?? { total: 0, n: 0 };
-      actual.total += log.puntaje;
+      actual.total += aPorcentaje(log.puntaje);
       actual.n += 1;
       porMes.set(periodo, actual);
     }
@@ -97,7 +103,7 @@ export const obtenerRegistrosAdmin = createServerFn({ method: "POST" })
       .map(([periodo, valor]) => ({
         periodo,
         etiqueta: new Intl.DateTimeFormat("es-CL", { month: "short", year: "2-digit", timeZone: "UTC" }).format(new Date(`${periodo}-15T12:00:00Z`)),
-        promedio: Math.round((valor.total / valor.n) * 10),
+        promedio: Math.min(100, Math.round(valor.total / valor.n)),
         actividades: valor.n,
       }));
 

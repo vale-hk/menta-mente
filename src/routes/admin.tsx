@@ -6,7 +6,7 @@ import { MentaFooter } from "@/components/MentaFooter";
 import { useTema } from "@/hooks/useTema";
 import { iniciarSesionAdmin, validarTokenAdmin } from "@/lib/admin.functions";
 import { obtenerRegistrosAdmin, type RegistroAdminDB, type ResumenMensualAdmin } from "@/lib/adminDatos.functions";
-import { generarDatosDemo } from "@/lib/adminDemo.functions";
+import { LeyendaLogro } from "@/components/LeyendaLogro";
 import {
   Bar,
   BarChart,
@@ -17,7 +17,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { comunasRM, registrosAdmin, type RegistroAdmin } from "@/data/adminMock";
+import { comunasRM, mensualMock, registrosAdmin, type RegistroAdmin } from "@/data/adminMock";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -281,11 +281,8 @@ function Dashboard() {
   const [comuna, setComuna] = useState<string>("todas");
 
   const cargarRegistros = useServerFn(obtenerRegistrosAdmin);
-  const generarDemo = useServerFn(generarDatosDemo);
   const [reales, setReales] = useState<RegistroAdminDB[] | null>(null);
   const [mensual, setMensual] = useState<ResumenMensualAdmin[]>([]);
-  const [generando, setGenerando] = useState(false);
-  const [mensajeDemo, setMensajeDemo] = useState("");
 
   useEffect(() => {
     const token = sessionStorage.getItem(CLAVE_SESION);
@@ -297,24 +294,6 @@ function Dashboard() {
       })
       .catch(() => setReales([]));
   }, [cargarRegistros]);
-
-  async function generarDatos() {
-    const token = sessionStorage.getItem(CLAVE_SESION);
-    if (!token || generando) return;
-    setGenerando(true);
-    setMensajeDemo("");
-    try {
-      const r = await generarDemo({ data: { token } });
-      setMensajeDemo(r.mensaje);
-      const act = await cargarRegistros({ data: { token } });
-       setReales(act.ok ? act.registros : []);
-       setMensual(act.ok ? act.mensual : []);
-    } catch {
-      setMensajeDemo("No fue posible generar los datos de demostración.");
-    } finally {
-      setGenerando(false);
-    }
-  }
 
   const conDatosReales = (reales?.length ?? 0) > 0;
   const fuente: RegistroAdminDB[] = useMemo(
@@ -347,7 +326,7 @@ function Dashboard() {
     () =>
       AREAS.map((a) => ({
         nombre: a.nombre,
-        valor: promedio(filtrados.map((r) => r[a.clave]).filter((v): v is number => v !== null)),
+        valor: Math.min(100, promedio(filtrados.map((r) => r[a.clave]).filter((v): v is number => v !== null))),
       })),
     [filtrados],
   );
@@ -381,17 +360,12 @@ function Dashboard() {
               ? "Indicadores calculados con la actividad real registrada por las personas usuarias de Menta."
               : "Aún no hay actividad registrada en la nube: se muestran datos de demostración."}
         </p>
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <Button variant="secondary" onClick={generarDatos} disabled={generando}>
-            {generando ? "Generando datos…" : "Generar 50 usuarios de demostración"}
-          </Button>
-          {mensajeDemo ? (
-            <p role="status" className="text-sm text-muted-foreground">
-              {mensajeDemo}
-            </p>
-          ) : null}
-        </div>
       </div>
+
+      <section aria-label="Leyenda de colores" className="surface-card p-5">
+        <h2 className="mb-3 text-xl font-semibold">Leyenda de rendimiento</h2>
+        <LeyendaLogro />
+      </section>
 
       <section aria-label="Resumen general" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Kpi titulo="Total de usuarios" valor={String(kpis.total)} detalle="registros visibles" />
@@ -457,7 +431,7 @@ function Dashboard() {
 
       <section
         aria-label="Filtros"
-        className="grid gap-4 rounded-xl border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-4"
+        className="grid gap-4 rounded-xl border-[3px] border-card-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-4"
       >
         <div className="space-y-2">
           <Label className="text-base">Rango de edad</Label>
@@ -509,7 +483,7 @@ function Dashboard() {
         </div>
       </section>
 
-      <section aria-label="Rendimiento por usuario" className="rounded-xl border border-border">
+      <section aria-label="Rendimiento por usuario" className="rounded-xl border-[3px] border-card-border">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
@@ -551,7 +525,7 @@ function Dashboard() {
                   <TableCell className="whitespace-nowrap">
                     {r.ultimaActividad ? fechaCorta(r.ultimaActividad) : "—"}
                   </TableCell>
-                   <TableCell><Puntaje valor={promedio([r.atencion, r.memoria, r.funciones, r.lenguaje].filter((v): v is number => v !== null))} /></TableCell>
+                   <TableCell><Puntaje valor={Math.min(100, promedio([r.atencion, r.memoria, r.funciones, r.lenguaje].filter((v): v is number => v !== null)))} /></TableCell>
                 </TableRow>
               ))}
               {filtrados.length === 0 ? (
@@ -572,12 +546,14 @@ function Dashboard() {
           <CardContent>
             <p className="mb-4 text-sm text-muted-foreground">Los datos se agrupan automáticamente por mes y conservan los períodos anteriores.</p>
             <div className="h-80 w-full">
-              <ResponsiveContainer width="100%" height="100%"><BarChart data={mensual.slice(-12)} margin={{ top: 8, right: 8, bottom: 30, left: -8 }}>
+              <ResponsiveContainer width="100%" height="100%"><BarChart data={(mensual.length && conDatosReales ? mensual : mensualMock).slice(-12)} margin={{ top: 8, right: 8, bottom: 30, left: -8 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.15} />
                 <XAxis dataKey="etiqueta" angle={-30} textAnchor="end" height={55} tick={{ fontSize: 11, fill: "currentColor" }} />
                 <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: "currentColor" }} />
                 <Tooltip formatter={(v: number) => [`${v}%`, "Logro promedio"]} />
-                <Bar dataKey="promedio" fill="var(--color-brand)" radius={[5, 5, 0, 0]} />
+                <Bar dataKey="promedio" radius={[5, 5, 0, 0]}>
+                  {(mensual.length && conDatosReales ? mensual : mensualMock).slice(-12).map((m) => <Cell key={m.periodo} fill={tonoLogro(m.promedio).hex} />)}
+                </Bar>
               </BarChart></ResponsiveContainer>
             </div>
           </CardContent>

@@ -54,14 +54,14 @@ function Index() {
           <Link to="/" aria-label="Menta, ir al inicio">
             <MarcaMenta subtitulo="Estimulación cognitiva estructurada" />
           </Link>
-          <div className="flex flex-wrap items-center gap-3 sm:justify-end">
+          <div className="flex flex-wrap items-start gap-3 sm:justify-end">
             <Link
               to={sesion ? "/ejercicios" : "/auth"}
               className="min-h-12 rounded-lg border-2 border-brand-foreground px-5 py-2 text-base font-semibold leading-8 text-brand-foreground transition-opacity hover:opacity-80"
             >
               {sesion ? "Ir a mis ejercicios" : "Ingresar"}
             </Link>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col items-center gap-1">
               <button
                 type="button"
                 onClick={alternar}
@@ -70,7 +70,7 @@ function Index() {
               >
                 {oscuro ? "Modo claro" : "Modo oscuro"}
               </button>
-               <span className="max-w-28 text-xs leading-snug text-brand-foreground/90">
+               <span className="text-center text-xs leading-tight text-brand-foreground/90">
                 Modo oscuro para baja visión
               </span>
             </div>
@@ -104,7 +104,7 @@ function Index() {
             {categorias.map((c) => (
               <article
                 key={c.id}
-                 className="surface-card border-4 border-brand-soft p-6"
+                 className="surface-card border-4 border-card-border p-6"
               >
                 <div className="flex items-center gap-4">
                   <IconoCategoria categoria={c.id} />
