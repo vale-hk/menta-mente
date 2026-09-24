@@ -9,11 +9,13 @@ import { obtenerPerfil, guardarPerfil } from "@/lib/perfil.functions";
 import { obtenerProgreso } from "@/lib/progreso.functions";
 import { FormularioPerfil } from "@/components/FormularioPerfil";
 import { categorias } from "@/data/ejercicios";
+import { MentaFooter } from "@/components/MentaFooter";
+import { UserRound, Brain, ChartNoAxesColumnIncreasing } from "lucide-react";
 
 const enlaces = [
-  { to: "/perfil", texto: "Mi perfil" },
-  { to: "/ejercicios", texto: "Ejercicios" },
-  { to: "/progreso", texto: "Mi progreso" },
+  { to: "/perfil", texto: "Mi perfil", Icono: UserRound },
+  { to: "/ejercicios", texto: "Ejercicios", Icono: Brain },
+  { to: "/progreso", texto: "Mi progreso", Icono: ChartNoAxesColumnIncreasing },
 ] as const;
 
 function primerNombre(nombre: string) {
@@ -62,14 +64,14 @@ export function IntranetShell({ children }: { children: ReactNode }) {
   const mostrarOnboarding = perfil !== undefined && !perfil.completo;
 
   return (
-    <div className="min-h-dvh pb-24 md:pb-0">
+    <div className="min-h-dvh">
       <header className="sticky top-0 z-40 border-b-4 border-brand bg-brand">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-5 py-4">
+        <div className="mx-auto grid max-w-5xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 py-4">
           <Link to="/" aria-label="Menta, volver al menú principal">
             <MarcaMenta subtitulo="Volver al inicio" />
           </Link>
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex flex-col items-start">
+          <div className="flex flex-wrap items-center justify-end gap-3">
+            <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={alternar}
@@ -78,7 +80,7 @@ export function IntranetShell({ children }: { children: ReactNode }) {
               >
                 {oscuro ? "Modo claro" : "Modo oscuro"}
               </button>
-              <span className="mt-1 text-xs text-brand-foreground/85">
+               <span className="hidden max-w-28 text-xs leading-snug text-brand-foreground/90 sm:block">
                 Modo oscuro para baja visión
               </span>
             </div>
@@ -93,24 +95,24 @@ export function IntranetShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <div className="mx-auto flex max-w-5xl gap-8 px-5 py-8">
-        <nav
-          aria-label="Secciones de la intranet"
-          className="hidden w-56 shrink-0 flex-col gap-3 md:flex"
-        >
+      <nav aria-label="Secciones de la intranet" className="border-b-2 border-border bg-card">
+        <div className="mx-auto grid max-w-5xl grid-cols-3 gap-2 px-3 py-3 sm:gap-4 sm:px-5">
           {enlaces.map((e) => (
             <Link
               key={e.to}
               to={e.to}
               activeProps={{ className: "bg-primary text-primary-foreground" }}
-              className="min-h-14 rounded-lg border-2 border-border px-5 py-3 text-lg font-semibold leading-8 transition-colors hover:bg-accent hover:text-accent-foreground"
+              className="flex min-h-14 items-center justify-center gap-2 rounded-lg border-2 border-border px-2 py-3 text-center text-base font-semibold transition-colors hover:bg-accent hover:text-accent-foreground sm:text-lg"
             >
+              <e.Icono className="size-6 shrink-0" aria-hidden="true" />
               {e.texto}
             </Link>
           ))}
-        </nav>
+        </div>
+      </nav>
 
-        <div className="min-w-0 flex-1">
+      <div className="mx-auto max-w-5xl px-5 py-8">
+        <div className="min-w-0">
           {perfil?.completo && !cerrado && (
             <div
               role="status"
@@ -141,22 +143,7 @@ export function IntranetShell({ children }: { children: ReactNode }) {
           {children}
         </div>
       </div>
-
-      <nav
-        aria-label="Secciones de la intranet"
-        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 gap-2 border-t-2 border-border bg-card p-2 md:hidden"
-      >
-        {enlaces.map((e) => (
-          <Link
-            key={e.to}
-            to={e.to}
-            activeProps={{ className: "bg-primary text-primary-foreground" }}
-            className="flex min-h-16 items-center justify-center rounded-lg border-2 border-border px-2 text-center text-base font-semibold"
-          >
-            {e.texto}
-          </Link>
-        ))}
-      </nav>
+      <MentaFooter />
 
       {mostrarOnboarding && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-background/95 p-5">

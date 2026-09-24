@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTema } from "@/hooks/useTema";
 import { MarcaMenta } from "@/components/MarcaMenta";
+import { MentaFooter } from "@/components/MentaFooter";
 import { IconoCategoria } from "@/components/IconoCategoria";
 import { categorias } from "@/data/ejercicios";
 
@@ -41,18 +42,18 @@ function Index() {
   return (
     <div className="min-h-dvh">
       <header className="border-b-4 border-brand bg-brand">
-        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-4 px-5 py-6">
+        <div className="mx-auto grid max-w-5xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 py-5">
           <Link to="/" aria-label="Menta, ir al inicio">
             <MarcaMenta subtitulo="Estimulación cognitiva estructurada" />
           </Link>
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center justify-end gap-3">
             <Link
               to={sesion ? "/ejercicios" : "/auth"}
               className="min-h-12 rounded-lg border-2 border-brand-foreground px-5 py-2 text-base font-semibold leading-8 text-brand-foreground transition-opacity hover:opacity-80"
             >
               {sesion ? "Ir a mis ejercicios" : "Ingresar"}
             </Link>
-            <div className="flex flex-col items-start">
+            <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={alternar}
@@ -61,7 +62,7 @@ function Index() {
               >
                 {oscuro ? "Modo claro" : "Modo oscuro"}
               </button>
-              <span className="mt-1 text-xs text-brand-foreground/85">
+               <span className="max-w-28 text-xs leading-snug text-brand-foreground/90">
                 Modo oscuro para baja visión
               </span>
             </div>
@@ -69,17 +70,16 @@ function Index() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-4xl px-5 py-10">
+      <main className="mx-auto max-w-5xl px-5 py-10">
         <section aria-labelledby="intro">
-          <h2 id="intro" className="font-serif text-3xl font-semibold text-primary">
+          <h1 id="intro" className="font-serif text-3xl font-semibold text-primary">
             Ejercite su mente con actividades guiadas
-          </h2>
-          <p className="mt-3 max-w-2xl text-justify text-lg text-muted-foreground">
-            Menta reúne <strong className="font-bold">actividades interactivas</strong> de
-            estimulación cognitiva, un trabajo{" "}
-            <strong className="font-bold">que ayuda a la mente</strong> de las{" "}
-            <strong className="font-bold">personas mayores</strong>. Los ejercicios se realizan
-            dentro de su espacio privado y cada puntaje queda guardado para seguir su avance.
+          </h1>
+          <p className="mt-3 max-w-2xl text-justify text-lg text-foreground">
+            Menta reúne <strong className="font-black text-primary">actividades interactivas</strong>{" "}
+            de estimulación cognitiva, un trabajo <strong className="font-black text-primary">que ayuda a la mente</strong>{" "}
+            de las <strong className="font-black text-primary">personas mayores</strong>. Cada resultado
+            queda guardado para acompañar su avance.
           </p>
           {!sesion && (
             <p className="mt-4 text-lg">
@@ -96,7 +96,7 @@ function Index() {
             {categorias.map((c) => (
               <article
                 key={c.id}
-                className="surface-card border-4 border-brand p-6"
+                 className="surface-card border-4 border-brand-soft p-6"
               >
                 <div className="flex items-center gap-4">
                   <IconoCategoria categoria={c.id} />
@@ -126,20 +126,12 @@ function Index() {
         </section>
       </main>
 
-      <footer className="border-t-4 border-brand bg-brand">
-        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3 px-5 py-6">
-          <p className="text-sm text-brand-foreground">
-            Menta · Material de apoyo fonoaudiológico. No reemplaza la evaluación clínica
-            profesional.
-          </p>
-          <Link
-            to="/admin"
-            className="rounded-md border-2 border-brand-foreground px-4 py-2 text-sm font-medium text-brand-foreground hover:opacity-80"
-          >
-            Acceso administración
-          </Link>
-        </div>
-      </footer>
+      <div className="bg-brand px-5 pt-5 text-center">
+        <Link to="/admin" className="inline-flex min-h-11 items-center rounded-lg border-2 border-brand-foreground px-4 py-2 text-sm font-semibold text-brand-foreground hover:opacity-80">
+          Acceso administración
+        </Link>
+      </div>
+      <MentaFooter />
 
     </div>
   );
