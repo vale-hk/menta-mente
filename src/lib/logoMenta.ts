@@ -1,18 +1,18 @@
-// Logo corporativo de Menta: hoja de menta con nombre y eslogan dentro, fondo blanco.
+// Logo corporativo de Menta: hoja de menta vertical con nombre y eslogan, fondo blanco.
 export const LOGO_ANCHO = 420;
 export const LOGO_ALTO = 200;
 
 export const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 200" width="840" height="400">
 <rect width="420" height="200" fill="#ffffff"/>
-<path d="M22 100 L6 110" stroke="#047857" stroke-width="6" stroke-linecap="round"/>
-<path d="M22 100 C 95 8, 325 8, 402 100 C 325 192, 95 192, 22 100 Z" fill="#ecfdf5" stroke="#059669" stroke-width="6"/>
+<path d="M62 178 L62 196" stroke="#047857" stroke-width="7" stroke-linecap="round"/>
+<path d="M62 176 C 14 128, 14 52, 62 8 C 110 52, 110 128, 62 176 Z" fill="#ecfdf5" stroke="#059669" stroke-width="6"/>
 <g stroke="#6ee7b7" stroke-width="2.5" stroke-linecap="round" fill="none">
-<path d="M40 100 H108"/><path d="M314 100 H384"/>
-<path d="M70 100 Q 80 78 98 62"/><path d="M70 100 Q 80 122 98 138"/>
-<path d="M352 100 Q 342 78 324 62"/><path d="M352 100 Q 342 122 324 138"/>
+<path d="M62 162 V 26"/>
+<path d="M62 130 Q 44 122 34 104"/><path d="M62 130 Q 80 122 90 104"/>
+<path d="M62 92 Q 46 84 38 68"/><path d="M62 92 Q 78 84 86 68"/>
 </g>
-<text x="211" y="102" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="58" font-weight="700" fill="#047857">Menta</text>
-<text x="211" y="134" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#065f46">Mentaliza, Memoriza &amp; Mejora.</text>
+<text x="138" y="112" font-family="Georgia, 'Times New Roman', serif" font-size="76" font-weight="700" fill="#047857">Menta</text>
+<text x="140" y="152" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#065f46">Mentaliza, Memoriza &amp; Mejora.</text>
 </svg>`;
 
 export const LOGO_DATA_URI = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(LOGO_SVG)}`;
