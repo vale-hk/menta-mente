@@ -155,7 +155,7 @@ export async function pdfAdmin(filas: FilaAdmin[], filtros: string, areas: Barra
       c.cell.styles.fontStyle = "bold";
     },
   });
-  y = 0;
+
   pie(doc);
   doc.save(`informe-clinico-menta-${new Date().toISOString().slice(0, 10)}.pdf`);
 }
