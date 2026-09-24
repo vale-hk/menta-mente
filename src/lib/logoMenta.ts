@@ -1,18 +1,18 @@
 // Logo corporativo de Menta: hoja de menta vertical con el nombre y el eslogan dentro de la hoja.
-export const LOGO_ANCHO = 380;
-export const LOGO_ALTO = 470;
+export const LOGO_ANCHO = 460;
+export const LOGO_ALTO = 560;
 
-export const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 470" width="760" height="940">
-<path d="M190 428 L190 462" stroke="#047857" stroke-width="9" stroke-linecap="round"/>
-<path d="M190 424 C 26 300, 26 130, 190 8 C 354 130, 354 300, 190 424 Z" fill="#ecfdf5" stroke="#059669" stroke-width="8"/>
-<g stroke="#6ee7b7" stroke-width="3" stroke-linecap="round" fill="none">
-<path d="M190 400 V 40"/>
-<path d="M190 340 Q 140 322 110 278"/><path d="M190 340 Q 240 322 270 278"/>
-<path d="M190 150 Q 150 136 126 100"/><path d="M190 150 Q 230 136 254 100"/>
+export const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 560" width="920" height="1120">
+<path d="M230 512 L230 552" stroke="#047857" stroke-width="11" stroke-linecap="round"/>
+<path d="M230 508 C 32 362, 32 152, 230 10 C 428 152, 428 362, 230 508 Z" fill="#ecfdf5" stroke="#059669" stroke-width="10"/>
+<g stroke="#6ee7b7" stroke-width="4" stroke-linecap="round" fill="none">
+<path d="M230 480 V 48"/>
+<path d="M230 410 Q 168 388 132 334"/><path d="M230 410 Q 292 388 328 334"/>
+<path d="M230 180 Q 180 162 152 120"/><path d="M230 180 Q 280 162 308 120"/>
 </g>
-<text x="190" y="225" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="62" font-weight="700" fill="#047857">Menta</text>
-<text x="190" y="262" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" fill="#065f46">Mentaliza, Memoriza</text>
-<text x="190" y="290" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" fill="#065f46">&amp; Mejora.</text>
+<text x="230" y="272" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="82" font-weight="700" fill="#047857">Menta</text>
+<text x="230" y="318" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#065f46">Mentaliza, Memoriza</text>
+<text x="230" y="352" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#065f46">&amp; Mejora.</text>
 </svg>`;
 
 export const LOGO_DATA_URI = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(LOGO_SVG)}`;
