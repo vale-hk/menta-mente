@@ -39,7 +39,7 @@ function interpretar(n: number, periodo: Periodo, edad: string, sexo: string, co
   const filtros = f.length ? `, aplicando el filtro de ${f.join(" y ")}` : ", sin filtros demográficos adicionales";
   if (n === 0) return `Durante ${ETIQUETA_P[periodo]}${filtros}, no se registraron evaluaciones. Se sugiere ampliar el rango de tiempo o los filtros.`;
   const orden = [...areas].sort((a, b) => b.valor - a.valor);
-  const mejor = orden[0], peor = orden[orden.length - 1];
+  const mejor = orden[0]!, peor = orden[orden.length - 1]!;
   const general = prom(areas.map((a) => a.valor));
   const nivel = general >= 90 ? "sobresaliente" : general >= 76 ? "bueno" : general >= 46 ? "intermedio" : "bajo";
   let t = `Durante ${ETIQUETA_P[periodo]}${filtros}, se evaluaron ${n} registro${n === 1 ? "" : "s"} de personas usuarias. `;
