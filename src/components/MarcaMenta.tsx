@@ -8,9 +8,9 @@ export function MarcaMenta({ subtitulo }: { subtitulo?: string }) {
         <span className="block font-serif text-4xl font-semibold text-emerald-700">
           Menta
         </span>
-        {subtitulo && (
-          <span className="hidden text-sm text-emerald-800 sm:block">{subtitulo}</span>
-        )}
+        <span className="block text-sm font-semibold text-emerald-800" title={subtitulo}>
+          Mentaliza, Memoriza &amp; Mejora.
+        </span>
       </span>
     </span>
   );

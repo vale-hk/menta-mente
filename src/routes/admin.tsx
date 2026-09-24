@@ -6,6 +6,9 @@ import { MentaFooter } from "@/components/MentaFooter";
 import { useTema } from "@/hooks/useTema";
 import { iniciarSesionAdmin, validarTokenAdmin } from "@/lib/admin.functions";
 import { obtenerRegistrosAdmin, type RegistroAdminDB, type ResumenMensualAdmin } from "@/lib/adminDatos.functions";
+import { TamanoTexto } from "@/components/TamanoTexto";
+import { claseInsignia } from "@/components/InsigniaLogro";
+import { ImprimirInformeAdmin } from "@/components/ImprimirInformeAdmin";
 import { LeyendaLogro } from "@/components/LeyendaLogro";
 import {
   Bar,
@@ -99,7 +102,8 @@ function Admin() {
           <Link to="/" aria-label="Menta, volver al inicio">
             <MarcaMenta subtitulo="Administración" />
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <TamanoTexto base={100} />
             <Button variant="outline" className="min-h-12 border-2 border-brand-foreground bg-brand-foreground/10 text-brand-foreground hover:bg-brand-foreground/20 hover:text-brand-foreground" onClick={alternar} aria-pressed={oscuro}>
               {oscuro ? "Modo claro" : "Modo oscuro"}
             </Button>
@@ -189,9 +193,9 @@ function LoginAdmin({ onOk }: { onOk: () => void }) {
   );
 }
 
-type RangoEdad = "todas" | "60-69" | "70-79" | "80+";
+export type RangoEdad = "todas" | "60-69" | "70-79" | "80+";
 
-function enRango(edad: number, rango: RangoEdad) {
+export function enRango(edad: number, rango: RangoEdad) {
   if (rango === "todas") return true;
   if (rango === "60-69") return edad >= 60 && edad <= 69;
   if (rango === "70-79") return edad >= 70 && edad <= 79;
@@ -243,10 +247,9 @@ function Puntaje({ valor }: { valor: number | null }) {
   if (valor === null) {
     return <span className="text-sm text-muted-foreground">Sin datos</span>;
   }
-  const tono = tonoLogro(valor);
   return (
     <span
-      className={`inline-block rounded-md px-2 py-1 text-sm font-bold ${tono.fondo} ${tono.texto}`}
+      className={`inline-block rounded-md px-2 py-1 text-sm font-extrabold ${claseInsignia(valor)}`}
     >
       {valor}%
     </span>
@@ -352,7 +355,10 @@ function Dashboard() {
   return (
     <main className="mx-auto max-w-6xl space-y-8 px-4 py-8">
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Panel de administración</h1>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <h1 className="text-3xl font-semibold tracking-tight">Panel de administración</h1>
+          <ImprimirInformeAdmin fuente={fuente} comunas={comunas} />
+        </div>
         <p className="mt-2 text-base text-muted-foreground">
           {reales === null
             ? "Cargando información de la nube…"
