@@ -150,7 +150,7 @@ function LoginAdmin({ onOk }: { onOk: () => void }) {
     <main className="mx-auto flex max-w-md flex-col justify-center px-4 py-16">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Acceso restringido</CardTitle>
+          <h1 className="font-serif text-3xl font-semibold text-primary">Acceso restringido</h1>
         </CardHeader>
         <CardContent>
           <p className="mb-6 text-base text-muted-foreground">
@@ -573,7 +573,7 @@ function Dashboard() {
                 <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.15} />
                 <XAxis dataKey="etiqueta" angle={-30} textAnchor="end" height={55} tick={{ fontSize: 11, fill: "currentColor" }} />
                 <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: "currentColor" }} />
-                <Tooltip formatter={(v: number, nombre: string) => [nombre === "promedio" ? `${v * 10}%` : v, nombre === "promedio" ? "Logro promedio" : "Actividades"]} />
+                <Tooltip formatter={(v: number) => [`${v}%`, "Logro promedio"]} />
                 <Bar dataKey="promedio" fill="var(--color-brand)" radius={[5, 5, 0, 0]} />
               </BarChart></ResponsiveContainer>
             </div>

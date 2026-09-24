@@ -66,7 +66,7 @@ export const obtenerRegistrosAdmin = createServerFn({ method: "POST" })
     }
 
     const prom = (v?: { total: number; n: number }) =>
-      v && v.n > 0 ? Math.round(v.total / v.n) : null;
+      v && v.n > 0 ? Math.round((v.total / v.n) * 10) : null;
 
     const registros: RegistroAdminDB[] = (perfiles ?? []).map((p) => {
       const a = acumulado.get(p.id);
@@ -97,7 +97,7 @@ export const obtenerRegistrosAdmin = createServerFn({ method: "POST" })
       .map(([periodo, valor]) => ({
         periodo,
         etiqueta: new Intl.DateTimeFormat("es-CL", { month: "short", year: "2-digit", timeZone: "UTC" }).format(new Date(`${periodo}-15T12:00:00Z`)),
-        promedio: Math.round(valor.total / valor.n),
+        promedio: Math.round((valor.total / valor.n) * 10),
         actividades: valor.n,
       }));
 
