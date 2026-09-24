@@ -60,7 +60,8 @@ function Ejercicios() {
     [guardar, queryClient],
   );
 
-  const actual = categorias.find((c) => c.id === categoria)!;
+  const actual = categorias.find((c) => c.id === categoria) ?? categorias[0];
+  if (!actual) return null;
   const lista = ejercicios.filter((e) => e.categoria === categoria);
   const resultadosArea = lista.filter((e) => resultados[e.id] !== undefined);
   const puntajeArea = resultadosArea.reduce((total, e) => total + (resultados[e.id] ?? 0), 0);
