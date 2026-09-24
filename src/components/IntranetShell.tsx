@@ -66,11 +66,11 @@ export function IntranetShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh">
       <header className="sticky top-0 z-40 border-b-4 border-brand bg-brand">
-        <div className="mx-auto grid max-w-5xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 py-4">
+        <div className="mx-auto grid max-w-5xl items-center gap-4 px-5 py-4 sm:grid-cols-[minmax(0,1fr)_auto]">
           <Link to="/" aria-label="Menta, volver al menú principal">
             <MarcaMenta subtitulo="Volver al inicio" />
           </Link>
-          <div className="flex flex-wrap items-center justify-end gap-3">
+          <div className="flex flex-wrap items-center gap-3 sm:justify-end">
             <div className="flex items-center gap-3">
               <button
                 type="button"

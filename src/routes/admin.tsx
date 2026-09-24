@@ -92,7 +92,7 @@ function Admin() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b-4 border-brand bg-brand">
-        <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-4 py-4">
+        <div className="mx-auto grid max-w-6xl items-center gap-4 px-4 py-4 sm:grid-cols-[minmax(0,1fr)_auto]">
           <Link to="/" aria-label="Menta, volver al inicio">
             <MarcaMenta subtitulo="Administración" />
           </Link>

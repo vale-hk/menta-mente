@@ -42,11 +42,11 @@ function Index() {
   return (
     <div className="min-h-dvh">
       <header className="border-b-4 border-brand bg-brand">
-        <div className="mx-auto grid max-w-5xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 py-5">
+        <div className="mx-auto grid max-w-5xl items-center gap-4 px-5 py-5 sm:grid-cols-[minmax(0,1fr)_auto]">
           <Link to="/" aria-label="Menta, ir al inicio">
             <MarcaMenta subtitulo="Estimulación cognitiva estructurada" />
           </Link>
-          <div className="flex flex-wrap items-center justify-end gap-3">
+          <div className="flex flex-wrap items-center gap-3 sm:justify-end">
             <Link
               to={sesion ? "/ejercicios" : "/auth"}
               className="min-h-12 rounded-lg border-2 border-brand-foreground px-5 py-2 text-base font-semibold leading-8 text-brand-foreground transition-opacity hover:opacity-80"

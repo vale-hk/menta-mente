@@ -66,7 +66,7 @@ function Auth() {
   return (
     <div className="min-h-dvh">
       <header className="border-b-4 border-brand bg-brand">
-        <div className="mx-auto grid max-w-4xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 py-5">
+        <div className="mx-auto grid max-w-4xl items-center gap-4 px-5 py-5 sm:grid-cols-[minmax(0,1fr)_auto]">
           <Link to="/" aria-label="Menta, volver al inicio">
             <MarcaMenta subtitulo="Acceso personal" />
           </Link>
