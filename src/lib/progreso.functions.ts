@@ -33,7 +33,7 @@ export const obtenerProgreso = createServerFn({ method: "GET" })
         .from("activity_logs")
         .select("id, categoria, nombre_ejercicio, ejercicio_id, puntaje, fecha_ejecucion")
         .order("fecha_ejecucion", { ascending: false })
-        .limit(500),
+        .limit(5000),
     ]);
 
     return {

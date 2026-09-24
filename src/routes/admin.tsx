@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { MintLeaf } from "@/components/MintLeaf";
+import { MarcaMenta } from "@/components/MarcaMenta";
+import { MentaFooter } from "@/components/MentaFooter";
 import { useTema } from "@/hooks/useTema";
 import { iniciarSesionAdmin, validarTokenAdmin } from "@/lib/admin.functions";
-import { obtenerRegistrosAdmin, type RegistroAdminDB } from "@/lib/adminDatos.functions";
+import { obtenerRegistrosAdmin, type RegistroAdminDB, type ResumenMensualAdmin } from "@/lib/adminDatos.functions";
 import { generarDatosDemo } from "@/lib/adminDemo.functions";
 import {
   Bar,
@@ -70,17 +71,20 @@ function Admin() {
   const validar = useServerFn(validarTokenAdmin);
 
   useEffect(() => {
+    let activo = true;
     const token = sessionStorage.getItem(CLAVE_SESION);
     if (!token) {
       setAutorizado(false);
-      return;
+      return () => { activo = false; };
     }
     validar({ data: { token } })
       .then((r) => {
+        if (!activo) return;
         if (!r.valido) sessionStorage.removeItem(CLAVE_SESION);
         setAutorizado(r.valido);
       })
-      .catch(() => setAutorizado(false));
+      .catch(() => { if (activo) setAutorizado(false); });
+    return () => { activo = false; };
   }, [validar]);
 
   function salir() {
@@ -90,21 +94,17 @@ function Admin() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
-          <Link to="/" className="flex items-center gap-3">
-            <MintLeaf className="h-9 w-9" />
-            <span className="text-2xl font-semibold tracking-tight">Menta</span>
-            <Badge variant="secondary" className="ml-1">
-              Administración
-            </Badge>
+      <header className="border-b-4 border-brand bg-brand">
+        <div className="mx-auto grid max-w-6xl items-center gap-4 px-4 py-4 sm:grid-cols-[minmax(0,1fr)_auto]">
+          <Link to="/" aria-label="Menta, volver al inicio">
+            <MarcaMenta subtitulo="Administración" />
           </Link>
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={alternar} aria-pressed={oscuro}>
+            <Button variant="outline" className="min-h-12 border-2 border-brand-foreground bg-brand-foreground/10 text-brand-foreground hover:bg-brand-foreground/20 hover:text-brand-foreground" onClick={alternar} aria-pressed={oscuro}>
               {oscuro ? "Modo claro" : "Modo oscuro"}
             </Button>
             {autorizado ? (
-              <Button variant="ghost" onClick={salir}>
+               <Button variant="outline" className="min-h-12 border-2 border-brand-foreground bg-transparent text-brand-foreground hover:bg-brand-foreground/20 hover:text-brand-foreground" onClick={salir}>
                 Cerrar panel
               </Button>
             ) : null}
@@ -119,6 +119,7 @@ function Admin() {
       ) : (
         <LoginAdmin onOk={() => setAutorizado(true)} />
       )}
+      <MentaFooter />
     </div>
   );
 }
@@ -152,7 +153,7 @@ function LoginAdmin({ onOk }: { onOk: () => void }) {
     <main className="mx-auto flex max-w-md flex-col justify-center px-4 py-16">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Acceso restringido</CardTitle>
+          <h1 className="font-serif text-3xl font-semibold text-primary">Acceso restringido</h1>
         </CardHeader>
         <CardContent>
           <p className="mb-6 text-base text-muted-foreground">
@@ -282,6 +283,7 @@ function Dashboard() {
   const cargarRegistros = useServerFn(obtenerRegistrosAdmin);
   const generarDemo = useServerFn(generarDatosDemo);
   const [reales, setReales] = useState<RegistroAdminDB[] | null>(null);
+  const [mensual, setMensual] = useState<ResumenMensualAdmin[]>([]);
   const [generando, setGenerando] = useState(false);
   const [mensajeDemo, setMensajeDemo] = useState("");
 
@@ -289,7 +291,10 @@ function Dashboard() {
     const token = sessionStorage.getItem(CLAVE_SESION);
     if (!token) return;
     cargarRegistros({ data: { token } })
-      .then((r) => setReales(r.ok ? r.registros : []))
+      .then((r) => {
+        setReales(r.ok ? r.registros : []);
+        setMensual(r.ok ? r.mensual : []);
+      })
       .catch(() => setReales([]));
   }, [cargarRegistros]);
 
@@ -302,7 +307,8 @@ function Dashboard() {
       const r = await generarDemo({ data: { token } });
       setMensajeDemo(r.mensaje);
       const act = await cargarRegistros({ data: { token } });
-      setReales(act.ok ? act.registros : []);
+       setReales(act.ok ? act.registros : []);
+       setMensual(act.ok ? act.mensual : []);
     } catch {
       setMensajeDemo("No fue posible generar los datos de demostración.");
     } finally {
@@ -332,6 +338,10 @@ function Dashboard() {
       ),
     [fuente, rango, sexo, comuna],
   );
+  const comparativa = useMemo(() => [...filtrados].sort((a, b) => {
+    const total = (r: RegistroAdminDB) => [r.atencion, r.memoria, r.funciones, r.lenguaje].reduce<number>((s, v) => s + (v ?? 0), 0);
+    return total(b) - total(a);
+  }), [filtrados]);
 
   const areas = useMemo(
     () =>
@@ -513,10 +523,11 @@ function Dashboard() {
                 <TableHead>F. ejecutivas</TableHead>
                 <TableHead>Lenguaje</TableHead>
                 <TableHead>Última actividad</TableHead>
+                <TableHead>Total</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtrados.map((r) => (
+              {comparativa.map((r) => (
                 <TableRow key={r.id}>
                   <TableCell className="font-medium">
                     {r.usuario}
@@ -540,11 +551,12 @@ function Dashboard() {
                   <TableCell className="whitespace-nowrap">
                     {r.ultimaActividad ? fechaCorta(r.ultimaActividad) : "—"}
                   </TableCell>
+                   <TableCell><Puntaje valor={promedio([r.atencion, r.memoria, r.funciones, r.lenguaje].filter((v): v is number => v !== null))} /></TableCell>
                 </TableRow>
               ))}
               {filtrados.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="py-10 text-center text-base text-muted-foreground">
+                  <TableCell colSpan={10} className="py-10 text-center text-base text-muted-foreground">
                     No hay usuarios que cumplan con los filtros seleccionados.
                   </TableCell>
                 </TableRow>
@@ -552,6 +564,24 @@ function Dashboard() {
             </TableBody>
           </Table>
         </div>
+      </section>
+
+      <section aria-label="Evolución anual de actividad">
+        <Card>
+          <CardHeader><CardTitle className="text-xl">Evolución anual de puntajes</CardTitle></CardHeader>
+          <CardContent>
+            <p className="mb-4 text-sm text-muted-foreground">Los datos se agrupan automáticamente por mes y conservan los períodos anteriores.</p>
+            <div className="h-80 w-full">
+              <ResponsiveContainer width="100%" height="100%"><BarChart data={mensual.slice(-12)} margin={{ top: 8, right: 8, bottom: 30, left: -8 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.15} />
+                <XAxis dataKey="etiqueta" angle={-30} textAnchor="end" height={55} tick={{ fontSize: 11, fill: "currentColor" }} />
+                <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: "currentColor" }} />
+                <Tooltip formatter={(v: number) => [`${v}%`, "Logro promedio"]} />
+                <Bar dataKey="promedio" fill="var(--color-brand)" radius={[5, 5, 0, 0]} />
+              </BarChart></ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
       </section>
     </main>
   );

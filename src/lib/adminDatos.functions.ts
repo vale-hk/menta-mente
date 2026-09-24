@@ -15,6 +15,13 @@ export type RegistroAdminDB = {
   ultimaActividad: string | null;
 };
 
+export type ResumenMensualAdmin = {
+  periodo: string;
+  etiqueta: string;
+  promedio: number;
+  actividades: number;
+};
+
 const CATEGORIAS = {
   atencion: "atencion",
   memoria: "memoria",
@@ -25,10 +32,10 @@ const CATEGORIAS = {
 /** Entrega los registros reales de la base de datos para el panel de administración. */
 export const obtenerRegistrosAdmin = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ token: z.string().max(300) }).parse(input))
-  .handler(async ({ data }): Promise<{ ok: boolean; registros: RegistroAdminDB[] }> => {
+  .handler(async ({ data }): Promise<{ ok: boolean; registros: RegistroAdminDB[]; mensual: ResumenMensualAdmin[] }> => {
     const { validarTokenAdminServidor } = await import("./adminToken.server");
     const valido = await validarTokenAdminServidor(data.token);
-    if (!valido) return { ok: false, registros: [] };
+    if (!valido) return { ok: false, registros: [], mensual: [] };
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
@@ -59,7 +66,7 @@ export const obtenerRegistrosAdmin = createServerFn({ method: "POST" })
     }
 
     const prom = (v?: { total: number; n: number }) =>
-      v && v.n > 0 ? Math.round(v.total / v.n) : null;
+      v && v.n > 0 ? Math.round((v.total / v.n) * 10) : null;
 
     const registros: RegistroAdminDB[] = (perfiles ?? []).map((p) => {
       const a = acumulado.get(p.id);
@@ -77,5 +84,22 @@ export const obtenerRegistrosAdmin = createServerFn({ method: "POST" })
       };
     });
 
-    return { ok: true, registros };
+    const porMes = new Map<string, { total: number; n: number }>();
+    for (const log of logs ?? []) {
+      const periodo = String(log.fecha_ejecucion).slice(0, 7);
+      const actual = porMes.get(periodo) ?? { total: 0, n: 0 };
+      actual.total += log.puntaje;
+      actual.n += 1;
+      porMes.set(periodo, actual);
+    }
+    const mensual = [...porMes.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([periodo, valor]) => ({
+        periodo,
+        etiqueta: new Intl.DateTimeFormat("es-CL", { month: "short", year: "2-digit", timeZone: "UTC" }).format(new Date(`${periodo}-15T12:00:00Z`)),
+        promedio: Math.round((valor.total / valor.n) * 10),
+        actividades: valor.n,
+      }));
+
+    return { ok: true, registros, mensual };
   });

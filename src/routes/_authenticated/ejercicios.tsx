@@ -36,6 +36,7 @@ function Ejercicios() {
   const queryClient = useQueryClient();
   const [categoria, setCategoria] = useState<Categoria>("atencion");
   const [aviso, setAviso] = useState<string | null>(null);
+  const [resultados, setResultados] = useState<Record<string, number>>({});
   const guardar = useServerFn(registrarActividad);
 
   const registrar = useCallback(
@@ -49,6 +50,7 @@ function Ejercicios() {
         },
       })
         .then(() => {
+          setResultados((actuales) => ({ ...actuales, [ejercicio.id]: puntaje }));
           setAviso(`Guardamos su resultado: ${puntaje} de 10 puntos.`);
           toast.success("¡Excelente esfuerzo, siga fortaleciendo su mente!", { duration: 5000 });
           queryClient.invalidateQueries({ queryKey: ["progreso"] });
@@ -58,8 +60,11 @@ function Ejercicios() {
     [guardar, queryClient],
   );
 
-  const actual = categorias.find((c) => c.id === categoria)!;
+  const actual = categorias.find((c) => c.id === categoria) ?? categorias[0];
+  if (!actual) return null;
   const lista = ejercicios.filter((e) => e.categoria === categoria);
+  const resultadosArea = lista.filter((e) => resultados[e.id] !== undefined);
+  const puntajeArea = resultadosArea.reduce((total, e) => total + (resultados[e.id] ?? 0), 0);
 
   return (
     <IntranetShell>
@@ -106,6 +111,22 @@ function Ejercicios() {
             ))}
           </RegistroProvider>
         </div>
+        {resultadosArea.length > 0 && (
+          <div role="status" className="mt-6 rounded-lg border-4 border-brand-soft bg-card p-6">
+            <p className="flex items-center gap-3 font-serif text-2xl font-semibold text-primary">
+              <IconoCategoria categoria={actual.id} />
+              {actual.titulo}: {puntajeArea}/{lista.length * 10} pts
+            </p>
+            <p className="mt-2 text-lg font-semibold">
+              ¡Muy buen trabajo! Cada actividad completada fortalece su constancia.
+            </p>
+            {resultadosArea.length < lista.length && (
+              <p className="mt-1 text-muted-foreground">
+                Lleva {resultadosArea.length} de {lista.length} actividades de esta área.
+              </p>
+            )}
+          </div>
+        )}
       </section>
     </IntranetShell>
   );

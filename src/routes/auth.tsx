@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { MintLeaf } from "@/components/MintLeaf";
+import { MarcaMenta } from "@/components/MarcaMenta";
+import { MentaFooter } from "@/components/MentaFooter";
 import { useTema } from "@/hooks/useTema";
 import { supabase } from "@/integrations/supabase/client";
 import { ingresar } from "@/lib/auth.functions";
@@ -64,25 +65,24 @@ function Auth() {
 
   return (
     <div className="min-h-dvh">
-      <header className="border-b border-border">
-        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-4 px-5 py-6">
-          <Link to="/" className="flex items-center gap-3">
-            <MintLeaf className="size-10 text-primary" />
-            <span className="font-serif text-3xl font-semibold tracking-tight">Menta</span>
+      <header className="border-b-4 border-brand bg-brand">
+        <div className="mx-auto grid max-w-4xl items-center gap-4 px-5 py-5 sm:grid-cols-[minmax(0,1fr)_auto]">
+          <Link to="/" aria-label="Menta, volver al inicio">
+            <MarcaMenta subtitulo="Acceso personal" />
           </Link>
           <button
             type="button"
             onClick={alternar}
             aria-pressed={oscuro}
-            className="min-h-12 rounded-lg border-2 border-border bg-secondary px-5 py-2 text-base font-semibold text-secondary-foreground"
+            className="min-h-12 rounded-lg border-2 border-brand-foreground bg-brand-foreground/10 px-5 py-2 text-base font-semibold text-brand-foreground"
           >
             {oscuro ? "Modo claro" : "Modo oscuro"}
           </button>
         </div>
       </header>
 
-      <main className="mx-auto max-w-md px-5 py-10">
-        <h1 className="font-serif text-3xl font-semibold">Ingrese a su espacio personal</h1>
+      <main className="mx-auto min-h-[calc(100dvh-250px)] max-w-md px-5 py-10">
+        <h1 className="font-serif text-3xl font-semibold text-primary">Ingrese a su espacio personal</h1>
         <p className="mt-2 text-muted-foreground">
           Escriba su nombre, su teléfono y el PIN de acceso que le entregó su profesional. La
           sesión queda abierta y sus ejercicios se guardan automáticamente.
@@ -138,6 +138,7 @@ function Auth() {
           </p>
         )}
       </main>
+      <MentaFooter />
     </div>
   );
 }
