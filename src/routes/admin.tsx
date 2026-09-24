@@ -71,17 +71,20 @@ function Admin() {
   const validar = useServerFn(validarTokenAdmin);
 
   useEffect(() => {
+    let activo = true;
     const token = sessionStorage.getItem(CLAVE_SESION);
     if (!token) {
       setAutorizado(false);
-      return;
+      return () => { activo = false; };
     }
     validar({ data: { token } })
       .then((r) => {
+        if (!activo) return;
         if (!r.valido) sessionStorage.removeItem(CLAVE_SESION);
         setAutorizado(r.valido);
       })
-      .catch(() => setAutorizado(false));
+      .catch(() => { if (activo) setAutorizado(false); });
+    return () => { activo = false; };
   }, [validar]);
 
   function salir() {
