@@ -77,7 +77,7 @@ function Progreso() {
 
     <section className="surface-card mt-8 border-4 border-card-border p-6" aria-labelledby="resumen">
       <h2 id="resumen" className="font-serif text-2xl font-semibold text-primary">Resumen general</h2>
-      <p className="mt-3 text-lg font-semibold">Rendimiento acumulado al {fecha(new Date().toISOString())}</p>
+      <p className="mt-3 text-lg font-semibold">Rendimiento del día: {fecha(new Date().toISOString())}</p>
       <p className={`mt-1 text-4xl font-semibold ${tono(pctGeneral)}`}>{pctGeneral}% de logro</p>
       <p className="mt-1 text-lg">Puntaje obtenido <strong>{puntos}</strong> / Puntaje total esperado <strong>{MAX_AREA * categorias.length}</strong></p>
       <div className="mt-5 rounded-lg border-2 border-border p-4"><h3 className="mb-3 text-lg font-semibold">¿Qué significan los colores?</h3><LeyendaLogro /></div>
