@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { descargarLogoJpg } from "@/lib/logoMenta";
 
 export function MentaFooter() {
   const year = new Date().getFullYear();
@@ -19,6 +20,9 @@ export function MentaFooter() {
           <Link to="/privacidad" className="underline decoration-2 underline-offset-4 hover:opacity-80">
             Políticas de Privacidad
           </Link>
+          <button type="button" onClick={() => void descargarLogoJpg()} className="underline decoration-2 underline-offset-4 hover:opacity-80">
+            Descargar logo (JPG)
+          </button>
         </nav>
       </div>
     </footer>

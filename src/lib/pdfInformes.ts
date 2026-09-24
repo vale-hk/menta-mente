@@ -15,18 +15,24 @@ async function crearDoc() {
   return { doc, autoTable };
 }
 
-function encabezado(doc: import("jspdf").jsPDF, titulo: string) {
+async function encabezado(doc: import("jspdf").jsPDF, titulo: string) {
+  const { logoRaster } = await import("./logoMenta");
   doc.setFillColor(16, 160, 110);
-  doc.rect(0, 0, 210, 26, "F");
+  doc.rect(0, 0, 210, 28, "F");
+  doc.setFillColor(255, 255, 255);
+  doc.roundedRect(10, 2.5, 51, 23, 3, 3, "F");
+  try {
+    doc.addImage(await logoRaster("image/png", 4), "PNG", 11.5, 3.5, 48, 21.5);
+  } catch {
+    doc.setTextColor(16, 120, 80);
+    doc.setFontSize(18);
+    doc.text("Menta", 14, 16);
+  }
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(20);
-  doc.text("Menta", 14, 14);
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.text("Mentaliza, Memoriza & Mejora.", 14, 21);
   doc.setFontSize(12);
   doc.text(titulo, 196, 16, { align: "right" });
+  doc.setFont("helvetica", "normal");
   doc.setTextColor(20, 20, 20);
 }
 
@@ -80,7 +86,7 @@ export type DatosInformeUsuario = {
 
 export async function pdfUsuario(d: DatosInformeUsuario) {
   const { doc, autoTable } = await crearDoc();
-  encabezado(doc, `Informe ${d.periodo}`);
+  await encabezado(doc, `Informe ${d.periodo}`);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
   doc.text(`¡Hola, ${d.nombre || "querido/a usuario/a"}!`, 14, 38);
@@ -124,9 +130,9 @@ export type FilaAdmin = {
   ultimaActividad: string | null;
 };
 
-export async function pdfAdmin(filas: FilaAdmin[], filtros: string, areas: Barra[]) {
+export async function pdfAdmin(filas: FilaAdmin[], filtros: string, areas: Barra[], interpretacion = "") {
   const { doc, autoTable } = await crearDoc();
-  encabezado(doc, "Informe clínico");
+  await encabezado(doc, "Informe clínico");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(15);
   doc.text("Reporte de rendimiento cognitivo", 14, 38);
@@ -155,6 +161,19 @@ export async function pdfAdmin(filas: FilaAdmin[], filtros: string, areas: Barra
       c.cell.styles.fontStyle = "bold";
     },
   });
+
+  if (interpretacion) {
+    // @ts-expect-error propiedad agregada por autotable
+    let yi = (doc.lastAutoTable.finalY as number) + 12;
+    const lineas = doc.splitTextToSize(interpretacion, 182) as string[];
+    if (yi + 10 + lineas.length * 5.5 > 280) { doc.addPage(); yi = 20; }
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.text("Texto interpretativo", 14, yi);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    doc.text(lineas, 14, yi + 8, { lineHeightFactor: 1.4 });
+  }
 
   pie(doc);
   doc.save(`informe-clinico-menta-${new Date().toISOString().slice(0, 10)}.pdf`);
