@@ -9,6 +9,7 @@ import { obtenerPerfil, guardarPerfil } from "@/lib/perfil.functions";
 import { obtenerProgreso } from "@/lib/progreso.functions";
 import { FormularioPerfil } from "@/components/FormularioPerfil";
 import { categorias } from "@/data/ejercicios";
+import { TamanoTexto } from "@/components/TamanoTexto";
 import { MentaFooter } from "@/components/MentaFooter";
 import { UserRound, Brain, ChartNoAxesColumnIncreasing } from "lucide-react";
 
@@ -71,6 +72,7 @@ export function IntranetShell({ children }: { children: ReactNode }) {
             <MarcaMenta subtitulo="Volver al inicio" />
           </Link>
           <div className="flex flex-wrap items-start gap-3 sm:justify-end">
+            <TamanoTexto base={112.5} />
             <div className="flex flex-col items-center gap-1">
               <button
                 type="button"

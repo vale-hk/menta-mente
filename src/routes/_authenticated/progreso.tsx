@@ -5,6 +5,8 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 import { IntranetShell } from "@/components/IntranetShell";
 import { LeyendaLogro } from "@/components/LeyendaLogro";
 import { IconoCategoria } from "@/components/IconoCategoria";
+import { InsigniaLogro } from "@/components/InsigniaLogro";
+import { ImprimirInformeUsuario } from "@/components/ImprimirInformeUsuario";
 import { obtenerProgreso } from "@/lib/progreso.functions";
 import { categorias, type Categoria } from "@/data/ejercicios";
 
@@ -73,19 +75,19 @@ function Progreso() {
 
   return <IntranetShell>
     <h1 className="font-serif text-3xl font-semibold text-primary">Mi progreso</h1>
-    <p className="mt-2 text-muted-foreground">Sus resultados, intentos anteriores y evolución durante los últimos 12 meses.</p>
+    <div className="mt-2 flex flex-wrap items-center justify-between gap-4"><p className="text-muted-foreground">Sus resultados, intentos anteriores y evolución durante los últimos 12 meses.</p><ImprimirInformeUsuario nombre={data?.nombre ?? ""} registros={registros} /></div>
 
     <section className="surface-card mt-8 border-4 border-card-border p-6" aria-labelledby="resumen">
       <h2 id="resumen" className="font-serif text-2xl font-semibold text-primary">Resumen general</h2>
       <p className="mt-3 text-lg font-semibold">Rendimiento del día: {fecha(new Date().toISOString())}</p>
-      <p className={`mt-1 text-4xl font-semibold ${tono(pctGeneral)}`}>{pctGeneral}% de logro</p>
+      <p className="mt-2 text-4xl"><InsigniaLogro pct={pctGeneral}>{`${pctGeneral}% de logro`}</InsigniaLogro></p>
       <p className="mt-1 text-lg">Puntaje obtenido <strong>{puntos}</strong> / Puntaje total esperado <strong>{MAX_AREA * categorias.length}</strong></p>
       <div className="mt-5 rounded-lg border-2 border-border p-4"><h3 className="mb-3 text-lg font-semibold">¿Qué significan los colores?</h3><LeyendaLogro /></div>
       {realizadas < categorias.length && <p role="status" className="mt-4 rounded-lg border-2 border-primary p-4 text-lg font-semibold">Complete todas las áreas para ver su progreso exacto ({realizadas} de 4 realizadas).</p>}
       <ul className="mt-6 grid gap-4 sm:grid-cols-2">
         {areas.map((a) => <li key={a.id} className="rounded-lg border-2 border-border p-4">
           <div className="flex items-center gap-3"><IconoCategoria categoria={a.id} className="size-11" /><span className="text-lg font-semibold">{a.titulo}</span></div>
-          <p className={`mt-2 text-2xl font-bold ${tono(a.pct)}`}>{a.puntos}/{MAX_AREA} pts · {a.pct}%</p>
+          <p className="mt-3 text-2xl"><InsigniaLogro pct={a.pct}>{`${a.puntos}/${MAX_AREA} pts · ${a.pct}%`}</InsigniaLogro></p>
           <p className="text-sm text-muted-foreground">{a.intentos} {a.intentos === 1 ? "intento" : "intentos"}</p>
         </li>)}
       </ul>
@@ -117,11 +119,11 @@ function Progreso() {
           return <article key={dia} className="surface-card p-5">
             <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
               <div><p className="text-sm font-semibold text-muted-foreground">Rendimiento del día</p><h3 className="font-serif text-xl font-semibold">{fecha(`${dia}T12:00:00`)}</h3></div>
-              <div className="text-right"><span className={`block text-xl font-bold ${tono(pctDia)}`}>{pctDia}% general</span><span className="text-sm">{ptsDia} / {MAX_AREA * categorias.length} pts esperados</span></div>
+              <div className="text-right"><span className="block text-xl"><InsigniaLogro pct={pctDia}>{`${pctDia}% general`}</InsigniaLogro></span><span className="text-sm">{ptsDia} / {MAX_AREA * categorias.length} pts esperados</span></div>
             </div>
             <ul className="mt-4 grid gap-2 sm:grid-cols-2">
-              {delDia.map((a) => <li key={a.id} className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 border-b border-border py-2">
-                <span className="flex items-center gap-2"><IconoCategoria categoria={a.id} className="size-6" />{a.titulo}</span><span className={`font-bold ${a.intentos ? tono(a.pct) : "text-muted-foreground"}`}>{a.intentos ? `${a.puntos}/${MAX_AREA} · ${a.pct}%` : "Sin realizar · 0%"}</span>
+              {delDia.map((a) => <li key={a.id} className="flex flex-wrap items-center justify-between gap-4 border-b border-border py-3">
+                <span className="flex items-center gap-3"><IconoCategoria categoria={a.id} className="size-7" />{a.titulo}</span>{a.intentos ? <InsigniaLogro pct={a.pct}>{`${a.puntos}/${MAX_AREA} · ${a.pct}%`}</InsigniaLogro> : <span className="font-bold text-muted-foreground">Sin realizar · 0%</span>}
               </li>)}
             </ul>
           </article>;

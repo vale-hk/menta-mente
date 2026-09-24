@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTema } from "@/hooks/useTema";
+import { TamanoTexto } from "@/components/TamanoTexto";
 import { MarcaMenta } from "@/components/MarcaMenta";
 import { MentaFooter } from "@/components/MentaFooter";
 import { IconoCategoria } from "@/components/IconoCategoria";
@@ -61,6 +62,7 @@ function Index() {
             >
               {sesion ? "Ir a mis ejercicios" : "Ingresar"}
             </Link>
+            <TamanoTexto base={100} />
             <div className="flex flex-col items-center gap-1">
               <button
                 type="button"
