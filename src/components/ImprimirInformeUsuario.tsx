@@ -11,12 +11,19 @@ export function ImprimirInformeUsuario({ nombre, registros }: { nombre: string; 
   const [abierto, setAbierto] = useState(false);
   const [generando, setGenerando] = useState(false);
 
-  async function generar(tipo: "mes" | "anio") {
+  async function generar(tipo: "dia" | "semana" | "mes" | "anio") {
     setGenerando(true);
     const hoy = new Date();
-    const claveMes = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}`;
-    const desde = new Date(hoy.getFullYear(), hoy.getMonth() - 11, 1).toISOString();
-    const propios = tipo === "mes" ? registros.filter((r) => r.fecha_ejecucion.startsWith(claveMes)) : registros.filter((r) => r.fecha_ejecucion >= desde);
+    const clave = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    const mismoDia = (d: Date) => d.toDateString() === hoy.toDateString();
+    const inicioAnio = new Date(hoy.getFullYear(), hoy.getMonth() - 11, 1).getTime();
+    const propios = registros.filter((r) => {
+      const d = new Date(r.fecha_ejecucion);
+      if (tipo === "dia") return mismoDia(d);
+      if (tipo === "semana") return hoy.getTime() - d.getTime() <= 7 * 86400000;
+      if (tipo === "mes") return clave(d) === clave(hoy);
+      return d.getTime() >= inicioAnio;
+    });
 
     const areas = categorias.map((c) => {
       const del = propios.filter((r) => r.categoria === c.id);
@@ -28,21 +35,23 @@ export function ImprimirInformeUsuario({ nombre, registros }: { nombre: string; 
     const puntos = areas.reduce((s, a) => s + a.puntos, 0);
     const maximo = MAX_AREA * categorias.length;
 
-    const evolucion = tipo === "mes"
+    const evolucion = tipo !== "anio"
       ? areas.map((a) => ({ etiqueta: a.titulo, valor: a.pct }))
       : Array.from({ length: 12 }, (_, i) => {
           const d = new Date(hoy.getFullYear(), hoy.getMonth() - 11 + i, 1);
-          const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-          const m = propios.filter((r) => r.fecha_ejecucion.startsWith(k));
+          const m = propios.filter((r) => clave(new Date(r.fecha_ejecucion)) === clave(d));
           return { etiqueta: new Intl.DateTimeFormat("es-CL", { month: "short" }).format(d), valor: m.length ? Math.round((m.reduce((s, r) => s + r.puntaje, 0) / m.length) * 10) : 0 };
         });
 
-    const periodo = tipo === "mes"
-      ? new Intl.DateTimeFormat("es-CL", { month: "long", year: "numeric" }).format(hoy)
-      : "últimos 12 meses";
+    const etiquetas = {
+      dia: `diario ${hoy.toLocaleDateString("es-CL")}`,
+      semana: "semanal (últimos 7 días)",
+      mes: `mensual ${new Intl.DateTimeFormat("es-CL", { month: "long", year: "numeric" }).format(hoy)}`,
+      anio: "anual (últimos 12 meses)",
+    };
     try {
       await pdfUsuario({
-        nombre, periodo: tipo === "mes" ? `mensual ${periodo}` : `anual (${periodo})`,
+        nombre, periodo: etiquetas[tipo],
         pctGeneral: Math.min(100, Math.round((puntos / maximo) * 100)), puntos, maximo, areas, evolucion,
         intentos: propios.map((r) => ({
           fecha: new Date(r.fecha_ejecucion).toLocaleDateString("es-CL"),
@@ -66,10 +75,12 @@ export function ImprimirInformeUsuario({ nombre, registros }: { nombre: string; 
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="font-serif text-2xl">¿Deseas imprimir el reporte por Mes o por Año?</DialogTitle>
+          <DialogTitle className="font-serif text-2xl">¿Qué período desea imprimir?</DialogTitle>
           <DialogDescription className="text-base">Se descargará un informe en PDF con sus resultados y su gráfico de evolución.</DialogDescription>
         </DialogHeader>
         <div className="grid gap-3 sm:grid-cols-2">
+          <button type="button" className={btn} disabled={generando} onClick={() => generar("dia")}>Por Día (hoy)</button>
+          <button type="button" className={btn} disabled={generando} onClick={() => generar("semana")}>Por Semana</button>
           <button type="button" className={btn} disabled={generando} onClick={() => generar("mes")}>Por Mes</button>
           <button type="button" className={btn} disabled={generando} onClick={() => generar("anio")}>Por Año</button>
         </div>
