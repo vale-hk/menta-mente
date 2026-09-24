@@ -70,8 +70,8 @@ export function IntranetShell({ children }: { children: ReactNode }) {
           <Link to="/" aria-label="Menta, volver al menú principal">
             <MarcaMenta subtitulo="Volver al inicio" />
           </Link>
-          <div className="flex flex-wrap items-center gap-3 sm:justify-end">
-            <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-start gap-3 sm:justify-end">
+            <div className="flex flex-col items-center gap-1">
               <button
                 type="button"
                 onClick={alternar}
@@ -80,7 +80,7 @@ export function IntranetShell({ children }: { children: ReactNode }) {
               >
                 {oscuro ? "Modo claro" : "Modo oscuro"}
               </button>
-               <span className="hidden max-w-28 text-xs leading-snug text-brand-foreground/90 sm:block">
+               <span className="text-center text-xs leading-tight text-brand-foreground/90">
                 Modo oscuro para baja visión
               </span>
             </div>
@@ -116,7 +116,7 @@ export function IntranetShell({ children }: { children: ReactNode }) {
           {perfil?.completo && !cerrado && (
             <div
               role="status"
-              className="mb-8 rounded-lg border-4 border-primary bg-card p-6"
+              className="mb-8 rounded-lg border-4 border-card-border bg-card p-6"
             >
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
@@ -151,7 +151,7 @@ export function IntranetShell({ children }: { children: ReactNode }) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="onboarding"
-            className="mx-auto my-6 max-w-lg rounded-lg border-4 border-primary bg-card p-6"
+            className="mx-auto my-6 max-w-lg rounded-lg border-4 border-card-border bg-card p-6"
           >
             <h2 id="onboarding" className="font-serif text-3xl font-semibold">
               Cuéntenos sobre usted

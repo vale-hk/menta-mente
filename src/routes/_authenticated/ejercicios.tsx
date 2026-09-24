@@ -112,7 +112,7 @@ function Ejercicios() {
           </RegistroProvider>
         </div>
         {resultadosArea.length > 0 && (
-          <div role="status" className="mt-6 rounded-lg border-4 border-brand-soft bg-card p-6">
+          <div role="status" className="mt-6 rounded-lg border-4 border-card-border bg-card p-6">
             <p className="flex items-center gap-3 font-serif text-2xl font-semibold text-primary">
               <IconoCategoria categoria={actual.id} />
               {actual.titulo}: {puntajeArea}/{lista.length * 10} pts

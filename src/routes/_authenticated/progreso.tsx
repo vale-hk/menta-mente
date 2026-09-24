@@ -74,7 +74,7 @@ function Progreso() {
     <h1 className="font-serif text-3xl font-semibold text-primary">Mi progreso</h1>
     <p className="mt-2 text-muted-foreground">Sus resultados, intentos anteriores y evolución durante los últimos 12 meses.</p>
 
-    <section className="surface-card mt-8 border-4 border-brand-soft p-6" aria-labelledby="resumen">
+    <section className="surface-card mt-8 border-4 border-card-border p-6" aria-labelledby="resumen">
       <h2 id="resumen" className="font-serif text-2xl font-semibold text-primary">Resumen general</h2>
       <p className={`mt-3 text-4xl font-semibold ${tono(pctGeneral)}`}>{puntos}/{MAX_AREA * categorias.length} puntos totales</p>
       {realizadas < categorias.length && <p role="status" className="mt-4 rounded-lg border-2 border-primary p-4 text-lg font-semibold">Complete todas las áreas para ver su progreso exacto ({realizadas} de 4 realizadas).</p>}

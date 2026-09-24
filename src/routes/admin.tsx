@@ -457,7 +457,7 @@ function Dashboard() {
 
       <section
         aria-label="Filtros"
-        className="grid gap-4 rounded-xl border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-4"
+        className="grid gap-4 rounded-xl border-[3px] border-card-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-4"
       >
         <div className="space-y-2">
           <Label className="text-base">Rango de edad</Label>
@@ -509,7 +509,7 @@ function Dashboard() {
         </div>
       </section>
 
-      <section aria-label="Rendimiento por usuario" className="rounded-xl border border-border">
+      <section aria-label="Rendimiento por usuario" className="rounded-xl border-[3px] border-card-border">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
