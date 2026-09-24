@@ -34,9 +34,17 @@ function Index() {
   const [sesion, setSesion] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSesion(Boolean(data.session)));
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSesion(Boolean(s)));
-    return () => sub.subscription.unsubscribe();
+    let activo = true;
+    supabase.auth.getSession().then(({ data }) => {
+      if (activo) setSesion(Boolean(data.session));
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
+      if (activo) setSesion(Boolean(s));
+    });
+    return () => {
+      activo = false;
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   return (

@@ -5,4 +5,4 @@
 - [x] Reubicar navegación de intranet y mostrar resultados por categoría.
 - [x] Ampliar Mi Progreso con historial y estadísticas anuales.
 - [x] Agregar colores por logro y gráfico anual al panel administrador.
-- [ ] Validar accesibilidad, escritorio y móvil.
+- [x] Validar accesibilidad, escritorio y móvil.
